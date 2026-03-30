@@ -1,0 +1,3752 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Beauty and Salon Management System - Full Source Code Appendix</title><style>body{font-family:Georgia,"Times New Roman",serif;margin:32px;color:#111;line-height:1.5}h1,h2{color:#6b3f2f}h1{border-bottom:2px solid #6b3f2f;padding-bottom:8px}h2{margin-top:28px;margin-bottom:10px;font-size:1.2rem}pre{white-space:pre-wrap;word-break:break-word;border:1px solid #000;padding:12px;background:#fafafa;font-family:"Courier New",monospace;font-size:12px;line-height:1.45}table{width:100%;border-collapse:collapse;margin:16px 0}th,td{border:1px solid #000;padding:8px;text-align:left;vertical-align:top}th{background:#f3e9e2}.meta{margin-bottom:20px;padding:12px;border:1px solid #000;background:#fcfcfc}</style></head><body><h1>Beauty and Salon Management System</h1><div class="meta"><strong>Appendix:</strong> Complete Source Code<br><strong>Purpose:</strong> Word-friendly source code attachment for project submission.</div><table border="1" cellspacing="0" cellpadding="8"><thead><tr><th>Section</th><th>Files Included</th></tr></thead><tbody><tr><td>Database</td><td>beauty_salon_management.sql</td></tr><tr><td>Backend</td><td>All configuration, routes, controllers, models, and middleware files</td></tr><tr><td>Frontend</td><td>All HTML pages, CSS, and JavaScript files</td></tr></tbody></table>
+<h2>database/beauty_salon_management.sql</h2><pre>DROP DATABASE IF EXISTS beauty_salon_management;
+CREATE DATABASE beauty_salon_management;
+USE beauty_salon_management;
+
+CREATE TABLE admin (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    type ENUM('super_admin', 'manager') NOT NULL DEFAULT 'manager',
+    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    email VARCHAR(120) NOT NULL UNIQUE,
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    mobile VARCHAR(15) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    file VARCHAR(255) DEFAULT NULL,
+    about TEXT,
+    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    email VARCHAR(120) NOT NULL UNIQUE,
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_parlour TINYINT(1) NOT NULL DEFAULT 0
+);
+
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL UNIQUE,
+    created_by INT NOT NULL,
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    CONSTRAINT fk_categories_admin
+        FOREIGN KEY (created_by) REFERENCES admin(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE services (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(120) NOT NULL,
+    service_type INT NOT NULL,
+    mobile VARCHAR(15) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by INT NOT NULL,
+    file VARCHAR(255) DEFAULT NULL,
+    detail TEXT,
+    CONSTRAINT fk_services_category
+        FOREIGN KEY (service_type) REFERENCES categories(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_services_user
+        FOREIGN KEY (created_by) REFERENCES user(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE appointment (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    service VARCHAR(255) NOT NULL,
+    appt_date DATE NOT NULL,
+    appt_time TIME NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(120) NOT NULL,
+    mobile VARCHAR(15) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    detail TEXT,
+    parlour INT NOT NULL,
+    created_by INT NULL,
+    status ENUM('booked', 'completed', 'cancelled') NOT NULL DEFAULT 'booked',
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_appointment_parlour
+        FOREIGN KEY (parlour) REFERENCES user(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_appointment_user
+        FOREIGN KEY (created_by) REFERENCES user(id)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+);
+
+CREATE TABLE appointment_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    appointment_id INT NOT NULL,
+    service_id INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT fk_appointment_items_appointment
+        FOREIGN KEY (appointment_id) REFERENCES appointment(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT fk_appointment_items_service
+        FOREIGN KEY (service_id) REFERENCES services(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    site_title VARCHAR(150) NOT NULL,
+    meta_title VARCHAR(150) NOT NULL,
+    meta_tags VARCHAR(255) DEFAULT NULL,
+    meta_desc TEXT,
+    date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    logo VARCHAR(255) DEFAULT NULL
+);
+
+INSERT INTO admin (name, password, type, status, email, date) VALUES
+('Aisha Khan', 'admin123', 'super_admin', 'active', 'admin@beautyhub.com', '2026-03-20 10:00:00'),
+('Nina Roy', 'manager123', 'manager', 'active', 'manager@beautyhub.com', '2026-03-21 11:00:00');
+
+INSERT INTO user (name, mobile, password, file, about, status, email, date, is_parlour) VALUES
+('Glow Studio', '9876500001', 'parlour123', 'https://placehold.co/120x120?text=Glow', 'Premium salon for bridal and skin treatments.', 'active', 'glow@beautyhub.com', '2026-03-21 09:15:00', 1),
+('Blush Bar', '9876500002', 'parlour123', 'https://placehold.co/120x120?text=Blush', 'Modern parlour focused on hair styling and grooming.', 'active', 'blush@beautyhub.com', '2026-03-21 09:30:00', 1),
+('Ritika Sharma', '9876500011', 'user123', 'https://placehold.co/120x120?text=Ritika', 'Regular customer who books weekend salon sessions.', 'active', 'ritika@gmail.com', '2026-03-22 14:00:00', 0),
+('Meera Jain', '9876500012', 'user123', 'https://placehold.co/120x120?text=Meera', 'Customer interested in facials and hair spa services.', 'active', 'meera@gmail.com', '2026-03-23 16:30:00', 0);
+
+INSERT INTO categories (title, created_by, date, status) VALUES
+('Hair Care', 1, '2026-03-22 10:00:00', 'active'),
+('Skin Care', 1, '2026-03-22 10:15:00', 'active'),
+('Bridal', 2, '2026-03-22 10:30:00', 'active');
+
+INSERT INTO services (title, service_type, mobile, address, price, status, date, created_by, file, detail) VALUES
+('Hair Spa', 1, '9876500001', '12 Lake Road, Kolkata', 799.00, 'active', '2026-03-23 12:00:00', 1, 'https://placehold.co/300x200?text=Hair+Spa', 'Nourishing hair spa with wash, massage, and conditioning.'),
+('Keratin Smoothening', 1, '9876500002', '44 Park Street, Kolkata', 2499.00, 'active', '2026-03-23 12:30:00', 2, 'https://placehold.co/300x200?text=Keratin', 'Professional smoothening treatment for frizz control.'),
+('Fruit Facial', 2, '9876500001', '12 Lake Road, Kolkata', 999.00, 'active', '2026-03-23 13:00:00', 1, 'https://placehold.co/300x200?text=Facial', 'Refreshing fruit facial for radiant and hydrated skin.'),
+('Bridal Makeup Package', 3, '9876500002', '44 Park Street, Kolkata', 8999.00, 'active', '2026-03-23 13:30:00', 2, 'https://placehold.co/300x200?text=Bridal', 'Full bridal makeup with hairstyling and draping support.');
+
+INSERT INTO appointment (service, appt_date, appt_time, name, email, mobile, address, detail, parlour, created_by, status, date) VALUES
+('Hair Spa, Fruit Facial', '2026-03-30', '11:00:00', 'Ritika Sharma', 'ritika@gmail.com', '9876500011', 'Salt Lake, Kolkata', 'Weekend self-care appointment.', 1, 3, 'booked', '2026-03-25 18:00:00'),
+('Bridal Makeup Package', '2026-04-02', '09:00:00', 'Meera Jain', 'meera@gmail.com', '9876500012', 'Ballygunge, Kolkata', 'Trial bridal look before event.', 2, 4, 'completed', '2026-03-26 15:45:00');
+
+INSERT INTO appointment_items (appointment_id, service_id, price) VALUES
+(1, 1, 799.00),
+(1, 3, 999.00),
+(2, 4, 8999.00);
+
+INSERT INTO settings (site_title, meta_title, meta_tags, meta_desc, date, logo) VALUES
+('Beauty and Salon Management System', 'BeautyHub Salon Dashboard', 'beauty, salon, booking, bridal, spa', 'Academic database project for salon booking, billing, and management.', '2026-03-24 09:00:00', 'https://placehold.co/200x80?text=BeautyHub');
+</pre><h2>backend/app.js</h2><pre>require('dotenv').config();
+
+const express = require('express');
+const path = require('path');
+const session = require('express-session');
+const createCrudController = require('./controllers/createCrudController');
+const appointmentController = require('./controllers/appointmentController');
+const authRoutes = require('./routes/authRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const createResourceRouter = require('./routes/createResourceRouter');
+const requireAuth = require('./middleware/authMiddleware');
+const errorMiddleware = require('./middleware/errorMiddleware');
+const { modules } = require('./config/modules');
+
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'beauty-salon-demo-secret',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
+app.get('/health', (req, res) =&gt; {
+  res.json({ message: 'Beauty and Salon Management System is running.' });
+});
+
+app.use('/api/auth', authRoutes);
+app.use('/api', requireAuth);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/admins', createResourceRouter(createCrudController(modules.admins)));
+app.use('/api/users', createResourceRouter(createCrudController(modules.users)));
+app.use('/api/categories', createResourceRouter(createCrudController(modules.categories)));
+app.use('/api/services', createResourceRouter(createCrudController(modules.services)));
+app.use('/api/settings', createResourceRouter(createCrudController(modules.settings)));
+app.use('/api/appointments', createResourceRouter(appointmentController));
+
+app.get('*', (req, res) =&gt; {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+});
+
+app.use(errorMiddleware);
+
+module.exports = app;
+</pre><h2>backend/server.js</h2><pre>const dotenv = require('dotenv');
+
+dotenv.config();
+
+const app = require('./app');
+
+const PORT = Number(process.env.PORT || 3000);
+
+app.listen(PORT, () =&gt; {
+  console.log(`Beauty and Salon Management System listening on http://localhost:${PORT}`);
+});
+</pre><h2>backend/config/db.js</h2><pre>const mysql = require('mysql2/promise');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  port: Number(process.env.DB_PORT || 3306),
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'beauty_salon_management',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
+
+module.exports = pool;
+</pre><h2>backend/config/modules.js</h2><pre>const normalizeString = (value) =&gt; {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  const trimmed = String(value).trim();
+  return trimmed.length ? trimmed : null;
+};
+
+const normalizeNumber = (value) =&gt; {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
+const normalizeBooleanNumber = (value) =&gt; {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+
+  return Number(value) ? 1 : 0;
+};
+
+const validateRequired = (payload, fields) =&gt;
+  fields.filter((field) =&gt; payload[field] === undefined || payload[field] === null || payload[field] === '');
+
+const modules = {
+  admins: {
+    table: 'admin',
+    select: `
+      a.id,
+      a.name,
+      a.password,
+      a.type,
+      a.status,
+      a.email,
+      DATE_FORMAT(a.date, '%Y-%m-%d %H:%i:%s') AS date
+    `,
+    from: 'admin a',
+    idExpression: 'a.id',
+    orderBy: 'a.id',
+    searchColumns: ['a.name', 'a.email'],
+    allowedFields: ['name', 'password', 'type', 'status', 'email', 'date'],
+    preparePayload(body) {
+      return {
+        name: normalizeString(body.name),
+        password: normalizeString(body.password),
+        type: normalizeString(body.type) || 'manager',
+        status: normalizeString(body.status) || 'active',
+        email: normalizeString(body.email),
+        date: normalizeString(body.date),
+      };
+    },
+    validate(payload) {
+      return validateRequired(payload, ['name', 'password', 'type', 'status', 'email']);
+    },
+  },
+  users: {
+    table: 'user',
+    select: `
+      u.id,
+      u.name,
+      u.mobile,
+      u.password,
+      u.file,
+      u.about,
+      u.status,
+      u.email,
+      DATE_FORMAT(u.date, '%Y-%m-%d %H:%i:%s') AS date,
+      u.is_parlour
+    `,
+    from: 'user u',
+    idExpression: 'u.id',
+    orderBy: 'u.id',
+    searchColumns: ['u.name', 'u.email', 'u.mobile'],
+    allowedFields: ['name', 'mobile', 'password', 'file', 'about', 'status', 'email', 'date', 'is_parlour'],
+    preparePayload(body) {
+      return {
+        name: normalizeString(body.name),
+        mobile: normalizeString(body.mobile),
+        password: normalizeString(body.password),
+        file: normalizeString(body.file),
+        about: normalizeString(body.about),
+        status: normalizeString(body.status) || 'active',
+        email: normalizeString(body.email),
+        date: normalizeString(body.date),
+        is_parlour: normalizeBooleanNumber(body.is_parlour),
+      };
+    },
+    validate(payload) {
+      return validateRequired(payload, ['name', 'mobile', 'password', 'status', 'email']);
+    },
+  },
+  categories: {
+    table: 'categories',
+    select: `
+      c.id,
+      c.title,
+      c.created_by,
+      a.name AS created_by_name,
+      DATE_FORMAT(c.date, '%Y-%m-%d %H:%i:%s') AS date,
+      c.status
+    `,
+    from: 'categories c LEFT JOIN admin a ON a.id = c.created_by',
+    idExpression: 'c.id',
+    orderBy: 'c.id',
+    searchColumns: ['c.title', 'a.name'],
+    allowedFields: ['title', 'created_by', 'date', 'status'],
+    preparePayload(body) {
+      return {
+        title: normalizeString(body.title),
+        created_by: normalizeNumber(body.created_by),
+        date: normalizeString(body.date),
+        status: normalizeString(body.status) || 'active',
+      };
+    },
+    validate(payload) {
+      return validateRequired(payload, ['title', 'created_by', 'status']);
+    },
+  },
+  services: {
+    table: 'services',
+    select: `
+      s.id,
+      s.title,
+      s.service_type,
+      c.title AS category_title,
+      s.mobile,
+      s.address,
+      s.price,
+      s.status,
+      DATE_FORMAT(s.date, '%Y-%m-%d %H:%i:%s') AS date,
+      s.created_by,
+      u.name AS created_by_name,
+      s.file,
+      s.detail
+    `,
+    from: 'services s LEFT JOIN categories c ON c.id = s.service_type LEFT JOIN user u ON u.id = s.created_by',
+    idExpression: 's.id',
+    orderBy: 's.id',
+    searchColumns: ['s.title', 's.detail', 's.address'],
+    allowedFields: ['title', 'service_type', 'mobile', 'address', 'price', 'status', 'date', 'created_by', 'file', 'detail'],
+    preparePayload(body) {
+      return {
+        title: normalizeString(body.title),
+        service_type: normalizeNumber(body.service_type),
+        mobile: normalizeString(body.mobile),
+        address: normalizeString(body.address),
+        price: normalizeNumber(body.price),
+        status: normalizeString(body.status) || 'active',
+        date: normalizeString(body.date),
+        created_by: normalizeNumber(body.created_by),
+        file: normalizeString(body.file),
+        detail: normalizeString(body.detail),
+      };
+    },
+    validate(payload) {
+      return validateRequired(payload, ['title', 'service_type', 'mobile', 'address', 'price', 'status', 'created_by']);
+    },
+  },
+  settings: {
+    table: 'settings',
+    select: `
+      s.id,
+      s.site_title,
+      s.meta_title,
+      s.meta_tags,
+      s.meta_desc,
+      DATE_FORMAT(s.date, '%Y-%m-%d %H:%i:%s') AS date,
+      s.logo
+    `,
+    from: 'settings s',
+    idExpression: 's.id',
+    orderBy: 's.id',
+    searchColumns: ['s.site_title', 's.meta_title'],
+    allowedFields: ['site_title', 'meta_title', 'meta_tags', 'meta_desc', 'date', 'logo'],
+    preparePayload(body) {
+      return {
+        site_title: normalizeString(body.site_title),
+        meta_title: normalizeString(body.meta_title),
+        meta_tags: normalizeString(body.meta_tags),
+        meta_desc: normalizeString(body.meta_desc),
+        date: normalizeString(body.date),
+        logo: normalizeString(body.logo),
+      };
+    },
+    validate(payload) {
+      return validateRequired(payload, ['site_title', 'meta_title']);
+    },
+  },
+};
+
+module.exports = {
+  modules,
+  normalizeNumber,
+  normalizeString,
+  normalizeBooleanNumber,
+  validateRequired,
+};
+</pre><h2>backend/models/crudModel.js</h2><pre>const pool = require('../config/db');
+
+const buildSearch = (config, search) =&gt; {
+  if (!search || !config.searchColumns || !config.searchColumns.length) {
+    return { clause: '', params: [] };
+  }
+
+  const where = config.searchColumns.map((column) =&gt; `${column} LIKE ?`).join(' OR ');
+  return {
+    clause: `WHERE ${where}`,
+    params: config.searchColumns.map(() =&gt; `%${search}%`),
+  };
+};
+
+const filterPayload = (payload, allowedFields) =&gt; {
+  const result = {};
+
+  allowedFields.forEach((field) =&gt; {
+    if (payload[field] !== undefined) {
+      result[field] = payload[field];
+    }
+  });
+
+  return result;
+};
+
+const list = async (config, search) =&gt; {
+  const { clause, params } = buildSearch(config, search);
+  const sql = `
+    SELECT ${config.select}
+    FROM ${config.from}
+    ${clause}
+    ORDER BY ${config.orderBy} ASC
+  `;
+  const [rows] = await pool.query(sql, params);
+  return rows;
+};
+
+const getById = async (config, id) =&gt; {
+  const sql = `
+    SELECT ${config.select}
+    FROM ${config.from}
+    WHERE ${config.idExpression} = ?
+  `;
+  const [rows] = await pool.query(sql, [id]);
+  return rows[0] || null;
+};
+
+const create = async (config, payload) =&gt; {
+  const filtered = filterPayload(payload, config.allowedFields);
+  const fields = Object.keys(filtered);
+  const values = Object.values(filtered);
+
+  const sql = `
+    INSERT INTO ${config.table} (${fields.join(', ')})
+    VALUES (${fields.map(() =&gt; '?').join(', ')})
+  `;
+  const [result] = await pool.query(sql, values);
+  return getById(config, result.insertId);
+};
+
+const update = async (config, id, payload) =&gt; {
+  const filtered = filterPayload(payload, config.allowedFields);
+  const fields = Object.keys(filtered);
+
+  if (!fields.length) {
+    return getById(config, id);
+  }
+
+  const sql = `
+    UPDATE ${config.table}
+    SET ${fields.map((field) =&gt; `${field} = ?`).join(', ')}
+    WHERE id = ?
+  `;
+
+  await pool.query(sql, [...fields.map((field) =&gt; filtered[field]), id]);
+  return getById(config, id);
+};
+
+const remove = async (config, id) =&gt; {
+  const [result] = await pool.query(`DELETE FROM ${config.table} WHERE id = ?`, [id]);
+  return result.affectedRows &gt; 0;
+};
+
+const navigate = async (config, direction, currentId) =&gt; {
+  const queries = {
+    first: `
+      SELECT ${config.select}
+      FROM ${config.from}
+      ORDER BY ${config.orderBy} ASC
+      LIMIT 1
+    `,
+    last: `
+      SELECT ${config.select}
+      FROM ${config.from}
+      ORDER BY ${config.orderBy} DESC
+      LIMIT 1
+    `,
+    next: `
+      SELECT ${config.select}
+      FROM ${config.from}
+      WHERE ${config.idExpression} &gt; ?
+      ORDER BY ${config.orderBy} ASC
+      LIMIT 1
+    `,
+    previous: `
+      SELECT ${config.select}
+      FROM ${config.from}
+      WHERE ${config.idExpression} &lt; ?
+      ORDER BY ${config.orderBy} DESC
+      LIMIT 1
+    `,
+  };
+
+  const sql = queries[direction] || queries.first;
+  const params = direction === 'next' || direction === 'previous' ? [currentId || 0] : [];
+  const [rows] = await pool.query(sql, params);
+  return rows[0] || null;
+};
+
+module.exports = {
+  list,
+  getById,
+  create,
+  update,
+  remove,
+  navigate,
+};
+</pre><h2>backend/controllers/createCrudController.js</h2><pre>const crudModel = require('../models/crudModel');
+
+const createCrudController = (config) =&gt; ({
+  async list(req, res, next) {
+    try {
+      const rows = await crudModel.list(config, req.query.search || '');
+      res.json({ data: rows });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getById(req, res, next) {
+    try {
+      const record = await crudModel.getById(config, req.params.id);
+
+      if (!record) {
+        return res.status(404).json({ message: 'Record not found.' });
+      }
+
+      res.json({ data: record });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async create(req, res, next) {
+    try {
+      const payload = config.preparePayload(req.body);
+      const missingFields = config.validate(payload);
+
+      if (missingFields.length) {
+        return res.status(400).json({ message: `Missing or invalid fields: ${missingFields.join(', ')}` });
+      }
+
+      const record = await crudModel.create(config, payload);
+      res.status(201).json({ message: 'Record created successfully.', data: record });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async update(req, res, next) {
+    try {
+      const payload = config.preparePayload(req.body);
+      const record = await crudModel.update(config, req.params.id, payload);
+      res.json({ message: 'Record updated successfully.', data: record });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async remove(req, res, next) {
+    try {
+      const deleted = await crudModel.remove(config, req.params.id);
+
+      if (!deleted) {
+        return res.status(404).json({ message: 'Record not found.' });
+      }
+
+      res.json({ message: 'Record deleted successfully.' });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async navigate(req, res, next) {
+    try {
+      const record = await crudModel.navigate(config, req.query.direction, req.query.currentId);
+
+      if (!record) {
+        return res.status(404).json({ message: 'No record found for this direction.' });
+      }
+
+      res.json({ data: record });
+    } catch (error) {
+      next(error);
+    }
+  },
+});
+
+module.exports = createCrudController;
+</pre><h2>backend/controllers/authController.js</h2><pre>const pool = require('../config/db');
+
+const login = async (req, res, next) =&gt; {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required.' });
+    }
+
+    const [rows] = await pool.query(
+      'SELECT id, name, email, type, status FROM admin WHERE email = ? AND password = ? AND status = "active" LIMIT 1',
+      [email, password]
+    );
+
+    const admin = rows[0];
+
+    if (!admin) {
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+
+    req.session.admin = admin;
+    res.json({ message: 'Login successful.', data: admin });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getSession = (req, res) =&gt; {
+  if (!req.session.admin) {
+    return res.status(401).json({ message: 'Unauthorized.' });
+  }
+
+  return res.json({ data: req.session.admin });
+};
+
+const logout = (req, res, next) =&gt; {
+  req.session.destroy((error) =&gt; {
+    if (error) {
+      return next(error);
+    }
+
+    res.json({ message: 'Logged out successfully.' });
+  });
+};
+
+module.exports = {
+  login,
+  getSession,
+  logout,
+};
+</pre><h2>backend/controllers/dashboardController.js</h2><pre>const pool = require('../config/db');
+
+const getStats = async (req, res, next) =&gt; {
+  try {
+    const [rows] = await pool.query(`
+      SELECT
+        (SELECT COUNT(*) FROM admin) AS total_admins,
+        (SELECT COUNT(*) FROM user) AS total_users,
+        (SELECT COUNT(*) FROM user WHERE is_parlour = 1) AS total_parlours,
+        (SELECT COUNT(*) FROM categories) AS total_categories,
+        (SELECT COUNT(*) FROM services) AS total_services,
+        (SELECT COUNT(*) FROM appointment) AS total_appointments,
+        (
+          SELECT COALESCE(SUM(ai.price), 0)
+          FROM appointment_items ai
+          INNER JOIN appointment ap ON ap.id = ai.appointment_id
+          WHERE ap.status &lt;&gt; 'cancelled'
+        ) AS total_revenue
+    `);
+
+    const [recentAppointments] = await pool.query(`
+      SELECT
+        ap.id,
+        ap.name,
+        ap.service,
+        DATE_FORMAT(ap.appt_date, '%Y-%m-%d') AS appt_date,
+        TIME_FORMAT(ap.appt_time, '%H:%i') AS appt_time,
+        ap.status,
+        u.name AS parlour_name,
+        COALESCE(bill.total_bill, 0) AS total_bill
+      FROM appointment ap
+      LEFT JOIN user u ON u.id = ap.parlour
+      LEFT JOIN (
+        SELECT appointment_id, SUM(price) AS total_bill
+        FROM appointment_items
+        GROUP BY appointment_id
+      ) bill ON bill.appointment_id = ap.id
+      ORDER BY ap.id DESC
+      LIMIT 5
+    `);
+
+    res.json({
+      data: {
+        stats: rows[0],
+        recentAppointments,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getStats,
+};
+</pre><h2>backend/controllers/appointmentController.js</h2><pre>const pool = require('../config/db');
+const { normalizeNumber, normalizeString, validateRequired } = require('../config/modules');
+
+const appointmentSelect = `
+  ap.id,
+  ap.service,
+  DATE_FORMAT(ap.appt_date, '%Y-%m-%d') AS appt_date,
+  TIME_FORMAT(ap.appt_time, '%H:%i') AS appt_time,
+  ap.name,
+  ap.email,
+  ap.mobile,
+  ap.address,
+  ap.detail,
+  ap.parlour,
+  parlour_user.name AS parlour_name,
+  ap.created_by,
+  created_user.name AS created_by_name,
+  ap.status,
+  DATE_FORMAT(ap.date, '%Y-%m-%d %H:%i:%s') AS date,
+  COALESCE(bill.total_bill, 0) AS total_bill
+`;
+
+const appointmentFrom = `
+  appointment ap
+  LEFT JOIN user parlour_user ON parlour_user.id = ap.parlour
+  LEFT JOIN user created_user ON created_user.id = ap.created_by
+  LEFT JOIN (
+    SELECT appointment_id, SUM(price) AS total_bill
+    FROM appointment_items
+    GROUP BY appointment_id
+  ) bill ON bill.appointment_id = ap.id
+`;
+
+const list = async (req, res, next) =&gt; {
+  try {
+    const search = req.query.search || '';
+    const params = [];
+    let whereClause = '';
+
+    if (search) {
+      whereClause = `
+        WHERE CAST(ap.appt_date AS CHAR) LIKE ?
+        OR ap.name LIKE ?
+        OR ap.service LIKE ?
+      `;
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    const [rows] = await pool.query(
+      `
+      SELECT ${appointmentSelect}
+      FROM ${appointmentFrom}
+      ${whereClause}
+      ORDER BY ap.id ASC
+      `,
+      params
+    );
+
+    res.json({ data: rows });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getById = async (id) =&gt; {
+  const [rows] = await pool.query(
+    `
+    SELECT ${appointmentSelect}
+    FROM ${appointmentFrom}
+    WHERE ap.id = ?
+    `,
+    [id]
+  );
+
+  return rows[0] || null;
+};
+
+const getOne = async (req, res, next) =&gt; {
+  try {
+    const appointment = await getById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found.' });
+    }
+
+    res.json({ data: appointment });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getServicesForInvoice = async (connection, serviceIds) =&gt; {
+  if (!serviceIds.length) {
+    return [];
+  }
+
+  const placeholders = serviceIds.map(() =&gt; '?').join(', ');
+  const [rows] = await connection.query(
+    `
+    SELECT id, title, price
+    FROM services
+    WHERE id IN (${placeholders}) AND status = 'active'
+    ORDER BY id ASC
+    `,
+    serviceIds
+  );
+
+  return rows;
+};
+
+const parseAppointmentPayload = (body) =&gt; ({
+  serviceIds: Array.isArray(body.serviceIds) ? body.serviceIds.map((value) =&gt; Number(value)).filter(Boolean) : [],
+  appt_date: normalizeString(body.appt_date),
+  appt_time: normalizeString(body.appt_time),
+  name: normalizeString(body.name),
+  email: normalizeString(body.email),
+  mobile: normalizeString(body.mobile),
+  address: normalizeString(body.address),
+  detail: normalizeString(body.detail),
+  parlour: normalizeNumber(body.parlour),
+  created_by: normalizeNumber(body.created_by) || null,
+  status: normalizeString(body.status) || 'booked',
+  date: normalizeString(body.date),
+});
+
+const validateAppointment = (payload) =&gt; {
+  const missing = validateRequired(payload, ['appt_date', 'appt_time', 'name', 'email', 'mobile', 'address', 'parlour', 'status']);
+
+  if (!payload.serviceIds.length) {
+    missing.push('serviceIds');
+  }
+
+  return missing;
+};
+
+const buildInvoice = (services) =&gt; {
+  const items = services.map((service) =&gt; ({
+    service_id: service.id,
+    title: service.title,
+    price: Number(service.price),
+  }));
+
+  const total = items.reduce((sum, item) =&gt; sum + item.price, 0);
+
+  return {
+    items,
+    total,
+  };
+};
+
+const create = async (req, res, next) =&gt; {
+  const payload = parseAppointmentPayload(req.body);
+  const missing = validateAppointment(payload);
+
+  if (missing.length) {
+    return res.status(400).json({ message: `Missing or invalid fields: ${missing.join(', ')}` });
+  }
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const services = await getServicesForInvoice(connection, payload.serviceIds);
+
+    if (services.length !== payload.serviceIds.length) {
+      await connection.rollback();
+      return res.status(400).json({ message: 'One or more selected services are invalid or inactive.' });
+    }
+
+    const invoice = buildInvoice(services);
+    const serviceSummary = services.map((service) =&gt; service.title).join(', ');
+
+    const [result] = await connection.query(
+      `
+      INSERT INTO appointment
+      (service, appt_date, appt_time, name, email, mobile, address, detail, parlour, created_by, status, date)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, CURRENT_TIMESTAMP))
+      `,
+      [
+        serviceSummary,
+        payload.appt_date,
+        payload.appt_time,
+        payload.name,
+        payload.email,
+        payload.mobile,
+        payload.address,
+        payload.detail || null,
+        payload.parlour,
+        payload.created_by,
+        payload.status,
+        payload.date || null,
+      ]
+    );
+
+    for (const item of invoice.items) {
+      await connection.query(
+        `
+        INSERT INTO appointment_items (appointment_id, service_id, price)
+        VALUES (?, ?, ?)
+        `,
+        [result.insertId, item.service_id, item.price]
+      );
+    }
+
+    await connection.commit();
+    const appointment = await getById(result.insertId);
+
+    res.status(201).json({
+      message: 'Appointment created successfully.',
+      data: appointment,
+      invoice: {
+        appointmentId: result.insertId,
+        serviceSummary,
+        items: invoice.items,
+        total: invoice.total,
+      },
+    });
+  } catch (error) {
+    await connection.rollback();
+    next(error);
+  } finally {
+    connection.release();
+  }
+};
+
+const update = async (req, res, next) =&gt; {
+  const payload = parseAppointmentPayload(req.body);
+  const missing = validateAppointment(payload);
+
+  if (missing.length) {
+    return res.status(400).json({ message: `Missing or invalid fields: ${missing.join(', ')}` });
+  }
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const existing = await getById(req.params.id);
+
+    if (!existing) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'Appointment not found.' });
+    }
+
+    const services = await getServicesForInvoice(connection, payload.serviceIds);
+
+    if (services.length !== payload.serviceIds.length) {
+      await connection.rollback();
+      return res.status(400).json({ message: 'One or more selected services are invalid or inactive.' });
+    }
+
+    const invoice = buildInvoice(services);
+    const serviceSummary = services.map((service) =&gt; service.title).join(', ');
+
+    await connection.query(
+      `
+      UPDATE appointment
+      SET service = ?, appt_date = ?, appt_time = ?, name = ?, email = ?, mobile = ?, address = ?, detail = ?, parlour = ?, created_by = ?, status = ?
+      WHERE id = ?
+      `,
+      [
+        serviceSummary,
+        payload.appt_date,
+        payload.appt_time,
+        payload.name,
+        payload.email,
+        payload.mobile,
+        payload.address,
+        payload.detail || null,
+        payload.parlour,
+        payload.created_by,
+        payload.status,
+        req.params.id,
+      ]
+    );
+
+    await connection.query('DELETE FROM appointment_items WHERE appointment_id = ?', [req.params.id]);
+
+    for (const item of invoice.items) {
+      await connection.query(
+        'INSERT INTO appointment_items (appointment_id, service_id, price) VALUES (?, ?, ?)',
+        [req.params.id, item.service_id, item.price]
+      );
+    }
+
+    await connection.commit();
+    const appointment = await getById(req.params.id);
+
+    res.json({
+      message: 'Appointment updated successfully.',
+      data: appointment,
+      invoice: {
+        appointmentId: Number(req.params.id),
+        serviceSummary,
+        items: invoice.items,
+        total: invoice.total,
+      },
+    });
+  } catch (error) {
+    await connection.rollback();
+    next(error);
+  } finally {
+    connection.release();
+  }
+};
+
+const remove = async (req, res, next) =&gt; {
+  try {
+    const [result] = await pool.query('DELETE FROM appointment WHERE id = ?', [req.params.id]);
+
+    if (!result.affectedRows) {
+      return res.status(404).json({ message: 'Appointment not found.' });
+    }
+
+    res.json({ message: 'Appointment deleted successfully.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const navigate = async (req, res, next) =&gt; {
+  try {
+    const direction = req.query.direction || 'first';
+    const currentId = Number(req.query.currentId || 0);
+    const queries = {
+      first: `
+        SELECT ${appointmentSelect}
+        FROM ${appointmentFrom}
+        ORDER BY ap.id ASC
+        LIMIT 1
+      `,
+      last: `
+        SELECT ${appointmentSelect}
+        FROM ${appointmentFrom}
+        ORDER BY ap.id DESC
+        LIMIT 1
+      `,
+      next: `
+        SELECT ${appointmentSelect}
+        FROM ${appointmentFrom}
+        WHERE ap.id &gt; ?
+        ORDER BY ap.id ASC
+        LIMIT 1
+      `,
+      previous: `
+        SELECT ${appointmentSelect}
+        FROM ${appointmentFrom}
+        WHERE ap.id &lt; ?
+        ORDER BY ap.id DESC
+        LIMIT 1
+      `,
+    };
+
+    const sql = queries[direction] || queries.first;
+    const params = direction === 'next' || direction === 'previous' ? [currentId] : [];
+    const [rows] = await pool.query(sql, params);
+
+    if (!rows[0]) {
+      return res.status(404).json({ message: 'No record found for this direction.' });
+    }
+
+    res.json({ data: rows[0] });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getInvoice = async (req, res, next) =&gt; {
+  try {
+    const appointment = await getById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found.' });
+    }
+
+    const [items] = await pool.query(
+      `
+      SELECT
+        ai.id,
+        ai.service_id,
+        s.title AS service_name,
+        ai.price
+      FROM appointment_items ai
+      INNER JOIN services s ON s.id = ai.service_id
+      WHERE ai.appointment_id = ?
+      ORDER BY ai.id ASC
+      `,
+      [req.params.id]
+    );
+
+    const total = items.reduce((sum, item) =&gt; sum + Number(item.price), 0);
+
+    res.json({
+      data: {
+        appointment,
+        items,
+        total,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  list,
+  getOne,
+  create,
+  update,
+  remove,
+  navigate,
+  getInvoice,
+};
+</pre><h2>backend/middleware/authMiddleware.js</h2><pre>const requireAuth = (req, res, next) =&gt; {
+  if (!req.session.admin) {
+    return res.status(401).json({ message: 'Unauthorized.' });
+  }
+
+  return next();
+};
+
+module.exports = requireAuth;
+</pre><h2>backend/middleware/errorMiddleware.js</h2><pre>const errorMiddleware = (error, req, res, next) =&gt; {
+  const mysqlConflictCodes = ['ER_DUP_ENTRY', 'ER_NO_REFERENCED_ROW_2', 'ER_ROW_IS_REFERENCED_2'];
+
+  if (mysqlConflictCodes.includes(error.code)) {
+    return res.status(400).json({ message: error.sqlMessage || error.message });
+  }
+
+  const statusCode = error.statusCode || 500;
+  return res.status(statusCode).json({
+    message: error.message || 'Internal server error.',
+  });
+};
+
+module.exports = errorMiddleware;
+</pre><h2>backend/routes/authRoutes.js</h2><pre>const express = require('express');
+const authController = require('../controllers/authController');
+
+const router = express.Router();
+
+router.post('/login', authController.login);
+router.get('/session', authController.getSession);
+router.post('/logout', authController.logout);
+
+module.exports = router;
+</pre><h2>backend/routes/createResourceRouter.js</h2><pre>const express = require('express');
+
+const createResourceRouter = (controller) =&gt; {
+  const router = express.Router();
+
+  router.get('/', controller.list);
+  router.get('/navigate', controller.navigate);
+  if (controller.getInvoice) {
+    router.get('/:id/invoice', controller.getInvoice);
+  }
+  router.get('/:id', controller.getById || controller.getOne);
+  router.post('/', controller.create);
+  router.put('/:id', controller.update);
+  router.delete('/:id', controller.remove);
+
+  return router;
+};
+
+module.exports = createResourceRouter;
+</pre><h2>backend/routes/dashboardRoutes.js</h2><pre>const express = require('express');
+const dashboardController = require('../controllers/dashboardController');
+
+const router = express.Router();
+
+router.get('/stats', dashboardController.getStats);
+
+module.exports = router;
+</pre><h2>frontend/index.html</h2><pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Beauty and Salon Management System | Admin Login&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
+  &lt;/head&gt;
+  &lt;body class="login-page"&gt;
+    &lt;div class="login-card"&gt;
+      &lt;section class="login-hero"&gt;
+        &lt;p&gt;Database Systems Project&lt;/p&gt;
+        &lt;h1&gt;Beauty and Salon Management System&lt;/h1&gt;
+        &lt;p&gt;
+          Manage salons, services, categories, appointments, and invoice generation in one full-stack web
+          application.
+        &lt;/p&gt;
+        &lt;ul class="login-highlights"&gt;
+          &lt;li&gt;Complete CRUD operations for all modules&lt;/li&gt;
+          &lt;li&gt;Search and record navigation support&lt;/li&gt;
+          &lt;li&gt;Automatic bill generation from selected services&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/section&gt;
+
+      &lt;section class="login-form-card"&gt;
+        &lt;h2&gt;Admin Login&lt;/h2&gt;
+        &lt;p class="helper-text"&gt;Use the sample credentials from the SQL file to enter the dashboard.&lt;/p&gt;
+        &lt;div id="loginMessage" class="message hidden"&gt;&lt;/div&gt;
+        &lt;form id="loginForm" class="panel-grid"&gt;
+          &lt;div class="field-group"&gt;
+            &lt;label for="email"&gt;Admin Email&lt;/label&gt;
+            &lt;input class="input" type="email" id="email" name="email" placeholder="admin@beautyhub.com" required /&gt;
+          &lt;/div&gt;
+          &lt;div class="field-group"&gt;
+            &lt;label for="password"&gt;Password&lt;/label&gt;
+            &lt;input class="input" type="password" id="password" name="password" placeholder="admin123" required /&gt;
+          &lt;/div&gt;
+          &lt;div class="button-row"&gt;
+            &lt;button type="submit" class="button"&gt;Login to Dashboard&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/form&gt;
+        &lt;p class="footer-note"&gt;Sample login: `admin@beautyhub.com` / `admin123`&lt;/p&gt;
+      &lt;/section&gt;
+    &lt;/div&gt;
+
+    &lt;script src="/js/api.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/login.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre><h2>frontend/dashboard.html</h2><pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Dashboard | Beauty and Salon Management System&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
+  &lt;/head&gt;
+  &lt;body data-protected="true" data-page="dashboard"&gt;
+    &lt;div class="app-shell"&gt;
+      &lt;aside class="sidebar"&gt;
+        &lt;div class="brand"&gt;
+          &lt;h1&gt;BeautyHub Admin&lt;/h1&gt;
+          &lt;p&gt;Salon booking, service management, and invoice tracking.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;nav class="nav-links"&gt;
+          &lt;a href="/dashboard.html" data-nav="dashboard"&gt;Dashboard&lt;/a&gt;
+          &lt;a href="/admins.html" data-nav="admins"&gt;Admins&lt;/a&gt;
+          &lt;a href="/users.html" data-nav="users"&gt;Users&lt;/a&gt;
+          &lt;a href="/categories.html" data-nav="categories"&gt;Categories&lt;/a&gt;
+          &lt;a href="/services.html" data-nav="services"&gt;Services&lt;/a&gt;
+          &lt;a href="/appointments.html" data-nav="appointments"&gt;Appointments&lt;/a&gt;
+          &lt;a href="/billing.html" data-nav="billing"&gt;Billing&lt;/a&gt;
+          &lt;a href="/settings.html" data-nav="settings"&gt;Settings&lt;/a&gt;
+        &lt;/nav&gt;
+        &lt;div class="sidebar-footer"&gt;
+          &lt;div class="admin-badge"&gt;Signed in as &lt;span data-admin-name&gt;Loading...&lt;/span&gt;&lt;/div&gt;
+          &lt;button class="button ghost" data-logout&gt;Logout&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/aside&gt;
+
+      &lt;main class="content"&gt;
+        &lt;section class="page-header"&gt;
+          &lt;div&gt;
+            &lt;h2&gt;Dashboard Overview&lt;/h2&gt;
+            &lt;p&gt;See key database records, recent appointments, and quick presentation-ready stats.&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class="header-actions"&gt;
+            &lt;a class="button secondary" href="/appointments.html"&gt;Book Appointment&lt;/a&gt;
+            &lt;a class="button" href="/billing.html"&gt;Open Billing&lt;/a&gt;
+          &lt;/div&gt;
+        &lt;/section&gt;
+
+        &lt;div id="dashboardMessage" class="message hidden"&gt;&lt;/div&gt;
+
+        &lt;section class="stats-grid" id="statsGrid"&gt;&lt;/section&gt;
+
+        &lt;section class="panel-grid" style="margin-top: 20px;"&gt;
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;Recent Appointments&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Latest bookings with automatically calculated bills.&lt;/p&gt;
+              &lt;/div&gt;
+              &lt;a class="button secondary" href="/appointments.html"&gt;Manage&lt;/a&gt;
+            &lt;/div&gt;
+            &lt;div class="table-wrap"&gt;
+              &lt;table&gt;
+                &lt;thead&gt;
+                  &lt;tr&gt;
+                    &lt;th&gt;ID&lt;/th&gt;
+                    &lt;th&gt;Customer&lt;/th&gt;
+                    &lt;th&gt;Service&lt;/th&gt;
+                    &lt;th&gt;Date&lt;/th&gt;
+                    &lt;th&gt;Status&lt;/th&gt;
+                    &lt;th&gt;Total&lt;/th&gt;
+                  &lt;/tr&gt;
+                &lt;/thead&gt;
+                &lt;tbody id="recentAppointmentsTable"&gt;&lt;/tbody&gt;
+              &lt;/table&gt;
+            &lt;/div&gt;
+          &lt;/article&gt;
+        &lt;/section&gt;
+      &lt;/main&gt;
+    &lt;/div&gt;
+
+    &lt;script src="/js/api.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/layout.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/dashboard.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre><h2>frontend/users.html</h2><pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;User Management | Beauty and Salon Management System&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
+  &lt;/head&gt;
+  &lt;body data-protected="true" data-page="users"&gt;
+    &lt;div class="app-shell"&gt;
+      &lt;aside class="sidebar"&gt;
+        &lt;div class="brand"&gt;
+          &lt;h1&gt;BeautyHub Admin&lt;/h1&gt;
+          &lt;p&gt;Manage customers and parlour profiles from one place.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;nav class="nav-links"&gt;
+          &lt;a href="/dashboard.html" data-nav="dashboard"&gt;Dashboard&lt;/a&gt;
+          &lt;a href="/admins.html" data-nav="admins"&gt;Admins&lt;/a&gt;
+          &lt;a href="/users.html" data-nav="users"&gt;Users&lt;/a&gt;
+          &lt;a href="/categories.html" data-nav="categories"&gt;Categories&lt;/a&gt;
+          &lt;a href="/services.html" data-nav="services"&gt;Services&lt;/a&gt;
+          &lt;a href="/appointments.html" data-nav="appointments"&gt;Appointments&lt;/a&gt;
+          &lt;a href="/billing.html" data-nav="billing"&gt;Billing&lt;/a&gt;
+          &lt;a href="/settings.html" data-nav="settings"&gt;Settings&lt;/a&gt;
+        &lt;/nav&gt;
+        &lt;div class="sidebar-footer"&gt;
+          &lt;div class="admin-badge"&gt;Signed in as &lt;span data-admin-name&gt;Loading...&lt;/span&gt;&lt;/div&gt;
+          &lt;button class="button ghost" data-logout&gt;Logout&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/aside&gt;
+
+      &lt;main class="content"&gt;
+        &lt;section class="page-header"&gt;
+          &lt;div&gt;
+            &lt;h2&gt;User Management&lt;/h2&gt;
+            &lt;p&gt;Search users by name and maintain both customer and parlour records.&lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/section&gt;
+
+        &lt;div id="userMessage" class="message hidden"&gt;&lt;/div&gt;
+
+        &lt;section class="panel-grid grid-two"&gt;
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;User Form&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Set “Is Parlour” to Yes for salon owners or service providers.&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;form id="userForm" class="form-grid"&gt;
+              &lt;input type="hidden" name="id" /&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Name&lt;/label&gt;
+                &lt;input class="input" name="name" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Email&lt;/label&gt;
+                &lt;input class="input" type="email" name="email" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Mobile&lt;/label&gt;
+                &lt;input class="input" name="mobile" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Password&lt;/label&gt;
+                &lt;input class="input" name="password" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Profile Image URL&lt;/label&gt;
+                &lt;input class="input" name="file" /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Status&lt;/label&gt;
+                &lt;select class="select" name="status" required&gt;
+                  &lt;option value="active"&gt;Active&lt;/option&gt;
+                  &lt;option value="inactive"&gt;Inactive&lt;/option&gt;
+                &lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Is Parlour&lt;/label&gt;
+                &lt;select class="select" name="is_parlour" required&gt;
+                  &lt;option value="0"&gt;No&lt;/option&gt;
+                  &lt;option value="1"&gt;Yes&lt;/option&gt;
+                &lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group full-width"&gt;
+                &lt;label&gt;About&lt;/label&gt;
+                &lt;textarea class="textarea" name="about"&gt;&lt;/textarea&gt;
+              &lt;/div&gt;
+              &lt;div class="button-row full-width"&gt;
+                &lt;button type="submit" class="button"&gt;Save User&lt;/button&gt;
+                &lt;button type="button" class="button secondary" id="userResetButton"&gt;Reset&lt;/button&gt;
+                &lt;button type="button" class="button danger" id="userDeleteButton"&gt;Delete Current&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/form&gt;
+          &lt;/article&gt;
+
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;User Records&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Required academic search feature: search users by name.&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="toolbar"&gt;
+              &lt;input class="input" id="userSearchInput" placeholder="Search users by name" /&gt;
+              &lt;button class="button secondary" id="userSearchButton"&gt;Search&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="table-wrap" style="margin-top: 14px;"&gt;
+              &lt;table&gt;
+                &lt;thead&gt;
+                  &lt;tr&gt;
+                    &lt;th&gt;ID&lt;/th&gt;
+                    &lt;th&gt;Name&lt;/th&gt;
+                    &lt;th&gt;Mobile&lt;/th&gt;
+                    &lt;th&gt;Email&lt;/th&gt;
+                    &lt;th&gt;Parlour&lt;/th&gt;
+                    &lt;th&gt;Status&lt;/th&gt;
+                    &lt;th&gt;Actions&lt;/th&gt;
+                  &lt;/tr&gt;
+                &lt;/thead&gt;
+                &lt;tbody id="userTableBody"&gt;&lt;/tbody&gt;
+              &lt;/table&gt;
+            &lt;/div&gt;
+            &lt;div class="navigator" data-nav-group="users" style="margin-top: 14px;"&gt;
+              &lt;button class="mini-button" data-direction="first"&gt;First&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="previous"&gt;Previous&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="next"&gt;Next&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="last"&gt;Last&lt;/button&gt;
+              &lt;span id="userNavigatorLabel"&gt;Current Record: none selected&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/article&gt;
+        &lt;/section&gt;
+      &lt;/main&gt;
+    &lt;/div&gt;
+
+    &lt;script src="/js/api.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/layout.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/module-page.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/users.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre><h2>frontend/categories.html</h2><pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Category Management | Beauty and Salon Management System&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
+  &lt;/head&gt;
+  &lt;body data-protected="true" data-page="categories"&gt;
+    &lt;div class="app-shell"&gt;
+      &lt;aside class="sidebar"&gt;
+        &lt;div class="brand"&gt;
+          &lt;h1&gt;BeautyHub Admin&lt;/h1&gt;
+          &lt;p&gt;Organize service categories used across the application.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;nav class="nav-links"&gt;
+          &lt;a href="/dashboard.html" data-nav="dashboard"&gt;Dashboard&lt;/a&gt;
+          &lt;a href="/admins.html" data-nav="admins"&gt;Admins&lt;/a&gt;
+          &lt;a href="/users.html" data-nav="users"&gt;Users&lt;/a&gt;
+          &lt;a href="/categories.html" data-nav="categories"&gt;Categories&lt;/a&gt;
+          &lt;a href="/services.html" data-nav="services"&gt;Services&lt;/a&gt;
+          &lt;a href="/appointments.html" data-nav="appointments"&gt;Appointments&lt;/a&gt;
+          &lt;a href="/billing.html" data-nav="billing"&gt;Billing&lt;/a&gt;
+          &lt;a href="/settings.html" data-nav="settings"&gt;Settings&lt;/a&gt;
+        &lt;/nav&gt;
+        &lt;div class="sidebar-footer"&gt;
+          &lt;div class="admin-badge"&gt;Signed in as &lt;span data-admin-name&gt;Loading...&lt;/span&gt;&lt;/div&gt;
+          &lt;button class="button ghost" data-logout&gt;Logout&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/aside&gt;
+
+      &lt;main class="content"&gt;
+        &lt;section class="page-header"&gt;
+          &lt;div&gt;
+            &lt;h2&gt;Categories&lt;/h2&gt;
+            &lt;p&gt;Maintain category records used to classify salon services.&lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/section&gt;
+
+        &lt;div id="categoryMessage" class="message hidden"&gt;&lt;/div&gt;
+
+        &lt;section class="panel-grid grid-two"&gt;
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;Category Form&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Choose which admin created the category entry.&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;form id="categoryForm" class="form-grid"&gt;
+              &lt;input type="hidden" name="id" /&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Category Title&lt;/label&gt;
+                &lt;input class="input" name="title" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Created By&lt;/label&gt;
+                &lt;select class="select" id="categoryCreatedBy" name="created_by" required&gt;&lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Status&lt;/label&gt;
+                &lt;select class="select" name="status" required&gt;
+                  &lt;option value="active"&gt;Active&lt;/option&gt;
+                  &lt;option value="inactive"&gt;Inactive&lt;/option&gt;
+                &lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="button-row full-width"&gt;
+                &lt;button type="submit" class="button"&gt;Save Category&lt;/button&gt;
+                &lt;button type="button" class="button secondary" id="categoryResetButton"&gt;Reset&lt;/button&gt;
+                &lt;button type="button" class="button danger" id="categoryDeleteButton"&gt;Delete Current&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/form&gt;
+          &lt;/article&gt;
+
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;Category Records&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Browse categories in table format and test navigation buttons.&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="toolbar"&gt;
+              &lt;input class="input" id="categorySearchInput" placeholder="Search categories" /&gt;
+              &lt;button class="button secondary" id="categorySearchButton"&gt;Search&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="table-wrap" style="margin-top: 14px;"&gt;
+              &lt;table&gt;
+                &lt;thead&gt;
+                  &lt;tr&gt;
+                    &lt;th&gt;ID&lt;/th&gt;
+                    &lt;th&gt;Title&lt;/th&gt;
+                    &lt;th&gt;Created By&lt;/th&gt;
+                    &lt;th&gt;Status&lt;/th&gt;
+                    &lt;th&gt;Date&lt;/th&gt;
+                    &lt;th&gt;Actions&lt;/th&gt;
+                  &lt;/tr&gt;
+                &lt;/thead&gt;
+                &lt;tbody id="categoryTableBody"&gt;&lt;/tbody&gt;
+              &lt;/table&gt;
+            &lt;/div&gt;
+            &lt;div class="navigator" data-nav-group="categories" style="margin-top: 14px;"&gt;
+              &lt;button class="mini-button" data-direction="first"&gt;First&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="previous"&gt;Previous&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="next"&gt;Next&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="last"&gt;Last&lt;/button&gt;
+              &lt;span id="categoryNavigatorLabel"&gt;Current Record: none selected&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/article&gt;
+        &lt;/section&gt;
+      &lt;/main&gt;
+    &lt;/div&gt;
+
+    &lt;script src="/js/api.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/layout.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/module-page.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/categories.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre><h2>frontend/services.html</h2><pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Services | Beauty and Salon Management System&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
+  &lt;/head&gt;
+  &lt;body data-protected="true" data-page="services"&gt;
+    &lt;div class="app-shell"&gt;
+      &lt;aside class="sidebar"&gt;
+        &lt;div class="brand"&gt;
+          &lt;h1&gt;BeautyHub Admin&lt;/h1&gt;
+          &lt;p&gt;Create and manage salon services with pricing information.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;nav class="nav-links"&gt;
+          &lt;a href="/dashboard.html" data-nav="dashboard"&gt;Dashboard&lt;/a&gt;
+          &lt;a href="/admins.html" data-nav="admins"&gt;Admins&lt;/a&gt;
+          &lt;a href="/users.html" data-nav="users"&gt;Users&lt;/a&gt;
+          &lt;a href="/categories.html" data-nav="categories"&gt;Categories&lt;/a&gt;
+          &lt;a href="/services.html" data-nav="services"&gt;Services&lt;/a&gt;
+          &lt;a href="/appointments.html" data-nav="appointments"&gt;Appointments&lt;/a&gt;
+          &lt;a href="/billing.html" data-nav="billing"&gt;Billing&lt;/a&gt;
+          &lt;a href="/settings.html" data-nav="settings"&gt;Settings&lt;/a&gt;
+        &lt;/nav&gt;
+        &lt;div class="sidebar-footer"&gt;
+          &lt;div class="admin-badge"&gt;Signed in as &lt;span data-admin-name&gt;Loading...&lt;/span&gt;&lt;/div&gt;
+          &lt;button class="button ghost" data-logout&gt;Logout&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/aside&gt;
+
+      &lt;main class="content"&gt;
+        &lt;section class="page-header"&gt;
+          &lt;div&gt;
+            &lt;h2&gt;Services&lt;/h2&gt;
+            &lt;p&gt;Required academic feature: search services and maintain pricing used in billing.&lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/section&gt;
+
+        &lt;div id="serviceMessage" class="message hidden"&gt;&lt;/div&gt;
+
+        &lt;section class="panel-grid grid-two"&gt;
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;Service Form&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Every appointment bill is calculated from these service prices.&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;form id="serviceForm" class="form-grid"&gt;
+              &lt;input type="hidden" name="id" /&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Service Title&lt;/label&gt;
+                &lt;input class="input" name="title" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Category&lt;/label&gt;
+                &lt;select class="select" id="serviceType" name="service_type" required&gt;&lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Parlour&lt;/label&gt;
+                &lt;select class="select" id="serviceCreatedBy" name="created_by" required&gt;&lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Contact Mobile&lt;/label&gt;
+                &lt;input class="input" name="mobile" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Address&lt;/label&gt;
+                &lt;input class="input" name="address" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Price&lt;/label&gt;
+                &lt;input class="input" type="number" min="0" step="0.01" name="price" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Image URL&lt;/label&gt;
+                &lt;input class="input" name="file" /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Status&lt;/label&gt;
+                &lt;select class="select" name="status" required&gt;
+                  &lt;option value="active"&gt;Active&lt;/option&gt;
+                  &lt;option value="inactive"&gt;Inactive&lt;/option&gt;
+                &lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group full-width"&gt;
+                &lt;label&gt;Details&lt;/label&gt;
+                &lt;textarea class="textarea" name="detail"&gt;&lt;/textarea&gt;
+              &lt;/div&gt;
+              &lt;div class="button-row full-width"&gt;
+                &lt;button type="submit" class="button"&gt;Save Service&lt;/button&gt;
+                &lt;button type="button" class="button secondary" id="serviceResetButton"&gt;Reset&lt;/button&gt;
+                &lt;button type="button" class="button danger" id="serviceDeleteButton"&gt;Delete Current&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/form&gt;
+          &lt;/article&gt;
+
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;Service Records&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Search by service title and browse using First, Last, Next, Previous.&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="toolbar"&gt;
+              &lt;input class="input" id="serviceSearchInput" placeholder="Search services" /&gt;
+              &lt;button class="button secondary" id="serviceSearchButton"&gt;Search&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="table-wrap" style="margin-top: 14px;"&gt;
+              &lt;table&gt;
+                &lt;thead&gt;
+                  &lt;tr&gt;
+                    &lt;th&gt;ID&lt;/th&gt;
+                    &lt;th&gt;Title&lt;/th&gt;
+                    &lt;th&gt;Category&lt;/th&gt;
+                    &lt;th&gt;Parlour&lt;/th&gt;
+                    &lt;th&gt;Price&lt;/th&gt;
+                    &lt;th&gt;Status&lt;/th&gt;
+                    &lt;th&gt;Actions&lt;/th&gt;
+                  &lt;/tr&gt;
+                &lt;/thead&gt;
+                &lt;tbody id="serviceTableBody"&gt;&lt;/tbody&gt;
+              &lt;/table&gt;
+            &lt;/div&gt;
+            &lt;div class="navigator" data-nav-group="services" style="margin-top: 14px;"&gt;
+              &lt;button class="mini-button" data-direction="first"&gt;First&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="previous"&gt;Previous&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="next"&gt;Next&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="last"&gt;Last&lt;/button&gt;
+              &lt;span id="serviceNavigatorLabel"&gt;Current Record: none selected&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/article&gt;
+        &lt;/section&gt;
+      &lt;/main&gt;
+    &lt;/div&gt;
+
+    &lt;script src="/js/api.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/layout.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/module-page.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/services.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre><h2>frontend/appointments.html</h2><pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Appointments | Beauty and Salon Management System&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
+  &lt;/head&gt;
+  &lt;body data-protected="true" data-page="appointments"&gt;
+    &lt;div class="app-shell"&gt;
+      &lt;aside class="sidebar"&gt;
+        &lt;div class="brand"&gt;
+          &lt;h1&gt;BeautyHub Admin&lt;/h1&gt;
+          &lt;p&gt;Book appointments and generate invoices directly from service prices.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;nav class="nav-links"&gt;
+          &lt;a href="/dashboard.html" data-nav="dashboard"&gt;Dashboard&lt;/a&gt;
+          &lt;a href="/admins.html" data-nav="admins"&gt;Admins&lt;/a&gt;
+          &lt;a href="/users.html" data-nav="users"&gt;Users&lt;/a&gt;
+          &lt;a href="/categories.html" data-nav="categories"&gt;Categories&lt;/a&gt;
+          &lt;a href="/services.html" data-nav="services"&gt;Services&lt;/a&gt;
+          &lt;a href="/appointments.html" data-nav="appointments"&gt;Appointments&lt;/a&gt;
+          &lt;a href="/billing.html" data-nav="billing"&gt;Billing&lt;/a&gt;
+          &lt;a href="/settings.html" data-nav="settings"&gt;Settings&lt;/a&gt;
+        &lt;/nav&gt;
+        &lt;div class="sidebar-footer"&gt;
+          &lt;div class="admin-badge"&gt;Signed in as &lt;span data-admin-name&gt;Loading...&lt;/span&gt;&lt;/div&gt;
+          &lt;button class="button ghost" data-logout&gt;Logout&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/aside&gt;
+
+      &lt;main class="content"&gt;
+        &lt;section class="page-header"&gt;
+          &lt;div&gt;
+            &lt;h2&gt;Appointment Booking&lt;/h2&gt;
+            &lt;p&gt;Required academic feature: search appointments by date and auto-generate the service bill.&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class="header-actions"&gt;
+            &lt;a class="button secondary" href="/billing.html"&gt;Open Billing Page&lt;/a&gt;
+          &lt;/div&gt;
+        &lt;/section&gt;
+
+        &lt;div id="appointmentMessage" class="message hidden"&gt;&lt;/div&gt;
+
+        &lt;section class="panel-grid grid-two"&gt;
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;Appointment Form&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Select one or more services. The invoice preview updates instantly.&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;form id="appointmentForm" class="form-grid"&gt;
+              &lt;input type="hidden" name="id" /&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Customer Name&lt;/label&gt;
+                &lt;input class="input" name="name" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Email&lt;/label&gt;
+                &lt;input class="input" type="email" name="email" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Mobile&lt;/label&gt;
+                &lt;input class="input" name="mobile" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Address&lt;/label&gt;
+                &lt;input class="input" name="address" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Appointment Date&lt;/label&gt;
+                &lt;input class="input" type="date" name="appt_date" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Appointment Time&lt;/label&gt;
+                &lt;input class="input" type="time" name="appt_time" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Parlour&lt;/label&gt;
+                &lt;select class="select" id="appointmentParlour" name="parlour" required&gt;&lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Booked By User&lt;/label&gt;
+                &lt;select class="select" id="appointmentCreatedBy" name="created_by"&gt;&lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Status&lt;/label&gt;
+                &lt;select class="select" name="status" required&gt;
+                  &lt;option value="booked"&gt;Booked&lt;/option&gt;
+                  &lt;option value="completed"&gt;Completed&lt;/option&gt;
+                  &lt;option value="cancelled"&gt;Cancelled&lt;/option&gt;
+                &lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group full-width"&gt;
+                &lt;label&gt;Selected Services&lt;/label&gt;
+                &lt;select class="select multi-select" id="appointmentServices" name="serviceIds" multiple required&gt;&lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group full-width"&gt;
+                &lt;label&gt;Details&lt;/label&gt;
+                &lt;textarea class="textarea" name="detail"&gt;&lt;/textarea&gt;
+              &lt;/div&gt;
+              &lt;div class="button-row full-width"&gt;
+                &lt;button type="submit" class="button"&gt;Save Appointment&lt;/button&gt;
+                &lt;button type="button" class="button secondary" id="appointmentResetButton"&gt;Reset&lt;/button&gt;
+                &lt;button type="button" class="button danger" id="appointmentDeleteButton"&gt;Delete Current&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/form&gt;
+          &lt;/article&gt;
+
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;Invoice Preview&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Bill formula: Total Bill = Sum of selected service prices.&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div id="invoicePreview"&gt;&lt;/div&gt;
+          &lt;/article&gt;
+        &lt;/section&gt;
+
+        &lt;section class="card" style="margin-top: 20px;"&gt;
+          &lt;div class="card-header"&gt;
+            &lt;div&gt;
+              &lt;h3&gt;Appointment Records&lt;/h3&gt;
+              &lt;p class="helper-text"&gt;Search by date such as `2026-03-30` to demonstrate the required filter.&lt;/p&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div class="toolbar"&gt;
+            &lt;input class="input" id="appointmentSearchInput" placeholder="Search appointments by date" /&gt;
+            &lt;button class="button secondary" id="appointmentSearchButton"&gt;Search&lt;/button&gt;
+          &lt;/div&gt;
+          &lt;div class="table-wrap" style="margin-top: 14px;"&gt;
+            &lt;table&gt;
+              &lt;thead&gt;
+                &lt;tr&gt;
+                  &lt;th&gt;ID&lt;/th&gt;
+                  &lt;th&gt;Customer&lt;/th&gt;
+                  &lt;th&gt;Service&lt;/th&gt;
+                  &lt;th&gt;Date&lt;/th&gt;
+                  &lt;th&gt;Parlour&lt;/th&gt;
+                  &lt;th&gt;Status&lt;/th&gt;
+                  &lt;th&gt;Total&lt;/th&gt;
+                  &lt;th&gt;Actions&lt;/th&gt;
+                &lt;/tr&gt;
+              &lt;/thead&gt;
+              &lt;tbody id="appointmentTableBody"&gt;&lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/div&gt;
+          &lt;div class="navigator" style="margin-top: 14px;"&gt;
+            &lt;button class="mini-button" data-direction="first"&gt;First&lt;/button&gt;
+            &lt;button class="mini-button" data-direction="previous"&gt;Previous&lt;/button&gt;
+            &lt;button class="mini-button" data-direction="next"&gt;Next&lt;/button&gt;
+            &lt;button class="mini-button" data-direction="last"&gt;Last&lt;/button&gt;
+            &lt;span id="appointmentNavigatorLabel"&gt;Current Record: none selected&lt;/span&gt;
+          &lt;/div&gt;
+        &lt;/section&gt;
+      &lt;/main&gt;
+    &lt;/div&gt;
+
+    &lt;script src="/js/api.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/layout.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/appointments.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre><h2>frontend/billing.html</h2><pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Billing | Beauty and Salon Management System&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
+  &lt;/head&gt;
+  &lt;body data-protected="true" data-page="billing"&gt;
+    &lt;div class="app-shell"&gt;
+      &lt;aside class="sidebar"&gt;
+        &lt;div class="brand"&gt;
+          &lt;h1&gt;BeautyHub Admin&lt;/h1&gt;
+          &lt;p&gt;Billing view for appointment invoices and printable total amounts.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;nav class="nav-links"&gt;
+          &lt;a href="/dashboard.html" data-nav="dashboard"&gt;Dashboard&lt;/a&gt;
+          &lt;a href="/admins.html" data-nav="admins"&gt;Admins&lt;/a&gt;
+          &lt;a href="/users.html" data-nav="users"&gt;Users&lt;/a&gt;
+          &lt;a href="/categories.html" data-nav="categories"&gt;Categories&lt;/a&gt;
+          &lt;a href="/services.html" data-nav="services"&gt;Services&lt;/a&gt;
+          &lt;a href="/appointments.html" data-nav="appointments"&gt;Appointments&lt;/a&gt;
+          &lt;a href="/billing.html" data-nav="billing"&gt;Billing&lt;/a&gt;
+          &lt;a href="/settings.html" data-nav="settings"&gt;Settings&lt;/a&gt;
+        &lt;/nav&gt;
+        &lt;div class="sidebar-footer"&gt;
+          &lt;div class="admin-badge"&gt;Signed in as &lt;span data-admin-name&gt;Loading...&lt;/span&gt;&lt;/div&gt;
+          &lt;button class="button ghost" data-logout&gt;Logout&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/aside&gt;
+
+      &lt;main class="content"&gt;
+        &lt;section class="page-header"&gt;
+          &lt;div&gt;
+            &lt;h2&gt;Billing&lt;/h2&gt;
+            &lt;p&gt;Display service name, individual price, and total amount for any appointment.&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class="header-actions"&gt;
+            &lt;button class="button success" id="printBillButton"&gt;Print Invoice&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/section&gt;
+
+        &lt;div id="billingMessage" class="message hidden"&gt;&lt;/div&gt;
+
+        &lt;section class="card"&gt;
+          &lt;div class="toolbar"&gt;
+            &lt;select class="select" id="billingAppointmentSelect" style="min-width: 280px;"&gt;&lt;/select&gt;
+            &lt;button class="button" id="loadInvoiceButton"&gt;Load Invoice&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/section&gt;
+
+        &lt;section class="card" style="margin-top: 20px;"&gt;
+          &lt;div class="card-header"&gt;
+            &lt;div&gt;
+              &lt;h3&gt;Invoice Details&lt;/h3&gt;
+              &lt;p class="helper-text"&gt;Generated directly from appointment records and related service prices.&lt;/p&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div id="billingInvoiceContainer"&gt;&lt;/div&gt;
+        &lt;/section&gt;
+      &lt;/main&gt;
+    &lt;/div&gt;
+
+    &lt;script src="/js/api.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/layout.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/billing.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre><h2>frontend/settings.html</h2><pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Settings | Beauty and Salon Management System&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
+  &lt;/head&gt;
+  &lt;body data-protected="true" data-page="settings"&gt;
+    &lt;div class="app-shell"&gt;
+      &lt;aside class="sidebar"&gt;
+        &lt;div class="brand"&gt;
+          &lt;h1&gt;BeautyHub Admin&lt;/h1&gt;
+          &lt;p&gt;Maintain system-level site settings and branding fields.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;nav class="nav-links"&gt;
+          &lt;a href="/dashboard.html" data-nav="dashboard"&gt;Dashboard&lt;/a&gt;
+          &lt;a href="/admins.html" data-nav="admins"&gt;Admins&lt;/a&gt;
+          &lt;a href="/users.html" data-nav="users"&gt;Users&lt;/a&gt;
+          &lt;a href="/categories.html" data-nav="categories"&gt;Categories&lt;/a&gt;
+          &lt;a href="/services.html" data-nav="services"&gt;Services&lt;/a&gt;
+          &lt;a href="/appointments.html" data-nav="appointments"&gt;Appointments&lt;/a&gt;
+          &lt;a href="/billing.html" data-nav="billing"&gt;Billing&lt;/a&gt;
+          &lt;a href="/settings.html" data-nav="settings"&gt;Settings&lt;/a&gt;
+        &lt;/nav&gt;
+        &lt;div class="sidebar-footer"&gt;
+          &lt;div class="admin-badge"&gt;Signed in as &lt;span data-admin-name&gt;Loading...&lt;/span&gt;&lt;/div&gt;
+          &lt;button class="button ghost" data-logout&gt;Logout&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/aside&gt;
+
+      &lt;main class="content"&gt;
+        &lt;section class="page-header"&gt;
+          &lt;div&gt;
+            &lt;h2&gt;Settings&lt;/h2&gt;
+            &lt;p&gt;CRUD page for the `settings` table required by the project schema.&lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/section&gt;
+
+        &lt;div id="settingsMessage" class="message hidden"&gt;&lt;/div&gt;
+
+        &lt;section class="panel-grid grid-two"&gt;
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;Settings Form&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Manage branding and metadata fields for the application.&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;form id="settingsForm" class="form-grid"&gt;
+              &lt;input type="hidden" name="id" /&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Site Title&lt;/label&gt;
+                &lt;input class="input" name="site_title" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group"&gt;
+                &lt;label&gt;Meta Title&lt;/label&gt;
+                &lt;input class="input" name="meta_title" required /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group full-width"&gt;
+                &lt;label&gt;Meta Tags&lt;/label&gt;
+                &lt;input class="input" name="meta_tags" /&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group full-width"&gt;
+                &lt;label&gt;Meta Description&lt;/label&gt;
+                &lt;textarea class="textarea" name="meta_desc"&gt;&lt;/textarea&gt;
+              &lt;/div&gt;
+              &lt;div class="field-group full-width"&gt;
+                &lt;label&gt;Logo URL&lt;/label&gt;
+                &lt;input class="input" name="logo" /&gt;
+              &lt;/div&gt;
+              &lt;div class="button-row full-width"&gt;
+                &lt;button type="submit" class="button"&gt;Save Settings&lt;/button&gt;
+                &lt;button type="button" class="button secondary" id="settingsResetButton"&gt;Reset&lt;/button&gt;
+                &lt;button type="button" class="button danger" id="settingsDeleteButton"&gt;Delete Current&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/form&gt;
+          &lt;/article&gt;
+
+          &lt;article class="card"&gt;
+            &lt;div class="card-header"&gt;
+              &lt;div&gt;
+                &lt;h3&gt;Settings Records&lt;/h3&gt;
+                &lt;p class="helper-text"&gt;Store one or multiple settings rows for demonstration purposes.&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="toolbar"&gt;
+              &lt;input class="input" id="settingsSearchInput" placeholder="Search settings" /&gt;
+              &lt;button class="button secondary" id="settingsSearchButton"&gt;Search&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="table-wrap" style="margin-top: 14px;"&gt;
+              &lt;table&gt;
+                &lt;thead&gt;
+                  &lt;tr&gt;
+                    &lt;th&gt;ID&lt;/th&gt;
+                    &lt;th&gt;Site Title&lt;/th&gt;
+                    &lt;th&gt;Meta Title&lt;/th&gt;
+                    &lt;th&gt;Date&lt;/th&gt;
+                    &lt;th&gt;Actions&lt;/th&gt;
+                  &lt;/tr&gt;
+                &lt;/thead&gt;
+                &lt;tbody id="settingsTableBody"&gt;&lt;/tbody&gt;
+              &lt;/table&gt;
+            &lt;/div&gt;
+            &lt;div class="navigator" data-nav-group="settings" style="margin-top: 14px;"&gt;
+              &lt;button class="mini-button" data-direction="first"&gt;First&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="previous"&gt;Previous&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="next"&gt;Next&lt;/button&gt;
+              &lt;button class="mini-button" data-direction="last"&gt;Last&lt;/button&gt;
+              &lt;span id="settingsNavigatorLabel"&gt;Current Record: none selected&lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/article&gt;
+        &lt;/section&gt;
+      &lt;/main&gt;
+    &lt;/div&gt;
+
+    &lt;script src="/js/api.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/layout.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/module-page.js"&gt;&lt;/script&gt;
+    &lt;script src="/js/settings.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre><h2>frontend/css/styles.css</h2><pre>:root {
+  --bg: linear-gradient(135deg, #f7efe5 0%, #fef9f6 45%, #f7d6bf 100%);
+  --panel: rgba(255, 255, 255, 0.88);
+  --panel-solid: #ffffff;
+  --border: rgba(126, 93, 65, 0.18);
+  --text: #38261c;
+  --muted: #7a5d49;
+  --accent: #c96b4b;
+  --accent-deep: #9c4e35;
+  --accent-soft: #f9e4d9;
+  --success: #2f7f62;
+  --danger: #c74f4f;
+  --warning: #bd7b28;
+  --shadow: 0 20px 50px rgba(93, 59, 37, 0.12);
+  --radius: 24px;
+  --radius-small: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Trebuchet MS", "Gill Sans", "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.login-page {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: min(980px, 100%);
+  display: grid;
+  grid-template-columns: 1.2fr 0.95fr;
+  gap: 24px;
+  padding: 24px;
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  box-shadow: var(--shadow);
+}
+
+.login-hero {
+  padding: 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.8), transparent 35%),
+    linear-gradient(145deg, #3f2318, #c96b4b 60%, #f1b08c);
+  color: #fffaf6;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -10% -25% auto;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.login-hero h1 {
+  margin: 0 0 16px;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.05;
+}
+
+.login-hero p,
+.login-hero li {
+  color: rgba(255, 250, 246, 0.88);
+}
+
+.login-highlights {
+  margin: 24px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.login-form-card {
+  padding: 18px 8px 8px;
+}
+
+.login-form-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.8rem;
+}
+
+.helper-text {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  padding: 26px 18px;
+  background: rgba(56, 38, 28, 0.92);
+  color: #fff8f1;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  padding: 18px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 20px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.brand p {
+  margin: 10px 0 0;
+  color: rgba(255, 248, 241, 0.76);
+  font-size: 0.92rem;
+}
+
+.nav-links {
+  display: grid;
+  gap: 8px;
+}
+
+.nav-links a {
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: rgba(255, 248, 241, 0.86);
+  transition: 0.2s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.sidebar-footer {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  gap: 10px;
+}
+
+.admin-badge {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  font-size: 0.95rem;
+}
+
+.content {
+  padding: 26px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.page-header h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+}
+
+.page-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.panel-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.grid-two {
+  grid-template-columns: 1.05fr 1.2fr;
+}
+
+.grid-three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.form-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+.field-group {
+  display: grid;
+  gap: 8px;
+}
+
+.field-group label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(126, 93, 65, 0.22);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--text);
+}
+
+.textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.multi-select {
+  min-height: 130px;
+}
+
+.button-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.button {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  background: var(--accent-deep);
+}
+
+.button.secondary {
+  background: #efe2d8;
+  color: var(--text);
+}
+
+.button.secondary:hover {
+  background: #e6d5c7;
+}
+
+.button.success {
+  background: var(--success);
+}
+
+.button.danger {
+  background: var(--danger);
+}
+
+.button.warning {
+  background: var(--warning);
+}
+
+.button.ghost {
+  background: transparent;
+  color: #fff8f1;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.message {
+  padding: 12px 14px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+
+.message.success {
+  background: rgba(47, 127, 98, 0.12);
+  color: var(--success);
+}
+
+.message.error {
+  background: rgba(199, 79, 79, 0.12);
+  color: var(--danger);
+}
+
+.message.info {
+  background: rgba(201, 107, 75, 0.12);
+  color: var(--accent-deep);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.table-wrap {
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(126, 93, 65, 0.14);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+  background: var(--panel-solid);
+}
+
+th,
+td {
+  padding: 14px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(126, 93, 65, 0.12);
+  vertical-align: top;
+}
+
+th {
+  background: #fff3ec;
+  color: var(--accent-deep);
+  font-size: 0.92rem;
+}
+
+tr:hover td {
+  background: #fffbf8;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mini-button {
+  padding: 8px 10px;
+  border: 1px solid rgba(126, 93, 65, 0.18);
+  background: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.mini-button:hover {
+  background: #fff3ec;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status-chip.active,
+.status-chip.booked,
+.status-chip.completed,
+.status-chip.super_admin,
+.status-chip.manager {
+  background: rgba(47, 127, 98, 0.12);
+  color: var(--success);
+}
+
+.status-chip.inactive,
+.status-chip.cancelled {
+  background: rgba(199, 79, 79, 0.12);
+  color: var(--danger);
+}
+
+.navigator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.navigator span {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stat-card {
+  padding: 22px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.88), transparent 25%),
+    linear-gradient(135deg, #fff9f5, #ffe4d4);
+  border: 1px solid rgba(126, 93, 65, 0.14);
+}
+
+.stat-card h4 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.stat-card strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 2rem;
+}
+
+.invoice {
+  display: grid;
+  gap: 16px;
+}
+
+.invoice-meta {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.invoice-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff4ec;
+  padding: 16px 18px;
+  border-radius: 18px;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.screenshot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.screenshot-grid img {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(126, 93, 65, 0.18);
+  box-shadow: var(--shadow);
+}
+
+.footer-note {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 1080px) {
+  .app-shell,
+  .login-card,
+  .grid-two,
+  .grid-three,
+  .stats-grid,
+  .screenshot-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: relative;
+    height: auto;
+  }
+
+  .app-shell {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .content,
+  .sidebar,
+  .login-card {
+    padding: 18px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media print {
+  .sidebar,
+  .header-actions,
+  .button-row,
+  .toolbar,
+  .navigator,
+  .page-header p,
+  .footer-note {
+    display: none !important;
+  }
+
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .content {
+    padding: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    border: none;
+    background: #fff;
+  }
+}
+</pre><h2>frontend/js/api.js</h2><pre>async function apiRequest(endpoint, options = {}) {
+  const config = {
+    method: options.method || 'GET',
+    headers: {
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(options.headers || {}),
+    },
+    credentials: 'same-origin',
+    body: options.body,
+  };
+
+  const response = await fetch(endpoint, config);
+  const payload = await response.json().catch(() =&gt; ({ message: 'Unexpected server response.' }));
+
+  if (response.status === 401 &amp;&amp; document.body.dataset.protected === 'true') {
+    window.location.href = '/index.html';
+    throw new Error('Session expired.');
+  }
+
+  if (!response.ok) {
+    throw new Error(payload.message || 'Request failed.');
+  }
+
+  return payload;
+}
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 2,
+  }).format(Number(value || 0));
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&amp;', '&amp;amp;')
+    .replaceAll('&lt;', '&amp;lt;')
+    .replaceAll('&gt;', '&amp;gt;')
+    .replaceAll('"', '&amp;quot;')
+    .replaceAll("'", '&amp;#39;');
+}
+
+function showMessage(elementId, message, type = 'success') {
+  const element = document.getElementById(elementId);
+  if (!element) {
+    return;
+  }
+
+  element.textContent = message;
+  element.className = `message ${type}`;
+  element.classList.remove('hidden');
+}
+
+function clearMessage(elementId) {
+  const element = document.getElementById(elementId);
+  if (!element) {
+    return;
+  }
+
+  element.textContent = '';
+  element.className = 'message hidden';
+}
+
+function formToObject(form) {
+  const data = {};
+
+  Array.from(form.elements).forEach((element) =&gt; {
+    if (!element.name) {
+      return;
+    }
+
+    if (element.multiple) {
+      data[element.name] = Array.from(element.selectedOptions).map((option) =&gt; option.value);
+      return;
+    }
+
+    data[element.name] = element.value;
+  });
+
+  return data;
+}
+
+function setFormValues(form, values) {
+  Array.from(form.elements).forEach((element) =&gt; {
+    if (!element.name) {
+      return;
+    }
+
+    const value = values[element.name];
+
+    if (element.multiple &amp;&amp; Array.isArray(value)) {
+      Array.from(element.options).forEach((option) =&gt; {
+        option.selected = value.map(String).includes(option.value);
+      });
+      return;
+    }
+
+    element.value = value ?? '';
+  });
+}
+
+function resetFormState(form, defaults = {}) {
+  form.reset();
+  setFormValues(form, defaults);
+}
+
+function populateSelect(selectId, items, options = {}) {
+  const select = document.getElementById(selectId);
+  if (!select) {
+    return;
+  }
+
+  const {
+    valueKey = 'id',
+    labelKey = 'name',
+    placeholder = 'Select an option',
+    includePlaceholder = true,
+  } = options;
+
+  const placeholderOption = includePlaceholder
+    ? `&lt;option value=""&gt;${escapeHtml(placeholder)}&lt;/option&gt;`
+    : '';
+
+  select.innerHTML =
+    placeholderOption +
+    items
+      .map((item) =&gt; `&lt;option value="${escapeHtml(item[valueKey])}"&gt;${escapeHtml(item[labelKey])}&lt;/option&gt;`)
+      .join('');
+}
+
+function renderStatusChip(status) {
+  return `&lt;span class="status-chip ${escapeHtml(status)}"&gt;${escapeHtml(String(status).replaceAll('_', ' '))}&lt;/span&gt;`;
+}
+
+function renderInvoice(containerId, invoiceData) {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    return;
+  }
+
+  if (!invoiceData || !invoiceData.items || !invoiceData.items.length) {
+    container.innerHTML = '&lt;p class="helper-text"&gt;No invoice selected yet.&lt;/p&gt;';
+    return;
+  }
+
+  const appointment = invoiceData.appointment;
+  const items = invoiceData.items
+    .map(
+      (item, index) =&gt; `
+        &lt;tr&gt;
+          &lt;td&gt;${index + 1}&lt;/td&gt;
+          &lt;td&gt;${escapeHtml(item.service_name || item.title)}&lt;/td&gt;
+          &lt;td&gt;${formatCurrency(item.price)}&lt;/td&gt;
+        &lt;/tr&gt;
+      `
+    )
+    .join('');
+
+  container.innerHTML = `
+    &lt;div class="invoice"&gt;
+      ${
+        appointment
+          ? `
+        &lt;div class="invoice-meta"&gt;
+          &lt;div&gt;&lt;strong&gt;Appointment ID:&lt;/strong&gt; #${escapeHtml(appointment.id)}&lt;/div&gt;
+          &lt;div&gt;&lt;strong&gt;Customer:&lt;/strong&gt; ${escapeHtml(appointment.name)}&lt;/div&gt;
+          &lt;div&gt;&lt;strong&gt;Date:&lt;/strong&gt; ${escapeHtml(appointment.appt_date)}&lt;/div&gt;
+          &lt;div&gt;&lt;strong&gt;Time:&lt;/strong&gt; ${escapeHtml(appointment.appt_time)}&lt;/div&gt;
+          &lt;div&gt;&lt;strong&gt;Parlour:&lt;/strong&gt; ${escapeHtml(appointment.parlour_name || '')}&lt;/div&gt;
+          &lt;div&gt;&lt;strong&gt;Status:&lt;/strong&gt; ${renderStatusChip(appointment.status)}&lt;/div&gt;
+        &lt;/div&gt;
+      `
+          : ''
+      }
+      &lt;div class="table-wrap"&gt;
+        &lt;table&gt;
+          &lt;thead&gt;
+            &lt;tr&gt;
+              &lt;th&gt;#&lt;/th&gt;
+              &lt;th&gt;Service Name&lt;/th&gt;
+              &lt;th&gt;Price&lt;/th&gt;
+            &lt;/tr&gt;
+          &lt;/thead&gt;
+          &lt;tbody&gt;${items}&lt;/tbody&gt;
+        &lt;/table&gt;
+      &lt;/div&gt;
+      &lt;div class="invoice-total"&gt;
+        &lt;span&gt;Total Amount&lt;/span&gt;
+        &lt;span&gt;${formatCurrency(invoiceData.total)}&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  `;
+}
+
+window.apiRequest = apiRequest;
+window.formatCurrency = formatCurrency;
+window.escapeHtml = escapeHtml;
+window.showMessage = showMessage;
+window.clearMessage = clearMessage;
+window.formToObject = formToObject;
+window.setFormValues = setFormValues;
+window.resetFormState = resetFormState;
+window.populateSelect = populateSelect;
+window.renderStatusChip = renderStatusChip;
+window.renderInvoice = renderInvoice;
+</pre><h2>frontend/js/layout.js</h2><pre>document.addEventListener('DOMContentLoaded', async () =&gt; {
+  const currentPage = document.body.dataset.page;
+
+  if (currentPage) {
+    const activeLink = document.querySelector(`[data-nav="${currentPage}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
+    }
+  }
+
+  document.querySelectorAll('[data-logout]').forEach((button) =&gt; {
+    button.addEventListener('click', async () =&gt; {
+      try {
+        await window.apiRequest('/api/auth/logout', { method: 'POST' });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        window.location.href = '/index.html';
+      }
+    });
+  });
+
+  if (document.body.dataset.protected !== 'true') {
+    return;
+  }
+
+  try {
+    const response = await window.apiRequest('/api/auth/session');
+    document.querySelectorAll('[data-admin-name]').forEach((element) =&gt; {
+      element.textContent = `${response.data.name} (${response.data.type.replace('_', ' ')})`;
+    });
+  } catch (error) {
+    console.error(error);
+  }
+});
+</pre><h2>frontend/js/module-page.js</h2><pre>function createCrudModule(config) {
+  const state = {
+    records: [],
+    currentId: null,
+    lookups: {},
+  };
+
+  const form = document.getElementById(config.formId);
+  const tableBody = document.getElementById(config.tableBodyId);
+  const searchInput = document.getElementById(config.searchInputId);
+  const deleteButton = document.getElementById(config.deleteButtonId);
+  const navigatorLabel = document.getElementById(config.navigatorLabelId);
+
+  const getRecordById = (id) =&gt; state.records.find((record) =&gt; Number(record.id) === Number(id));
+
+  const updateNavigatorLabel = (record) =&gt; {
+    if (!navigatorLabel) {
+      return;
+    }
+
+    navigatorLabel.textContent = record
+      ? `Current Record: #${record.id} - ${config.recordLabel(record)}`
+      : 'Current Record: none selected';
+  };
+
+  const populateForm = (record) =&gt; {
+    state.currentId = record?.id || null;
+    window.clearMessage(config.messageId);
+    window.setFormValues(form, record || config.defaultValues || {});
+    updateNavigatorLabel(record);
+    if (config.onRecordSelected) {
+      config.onRecordSelected(record, state);
+    }
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const resetForm = () =&gt; {
+    state.currentId = null;
+    window.resetFormState(form, config.defaultValues || {});
+    updateNavigatorLabel(null);
+    if (config.onRecordSelected) {
+      config.onRecordSelected(null, state);
+    }
+  };
+
+  const renderTable = () =&gt; {
+    tableBody.innerHTML = state.records.length
+      ? state.records.map((record, index) =&gt; config.renderRow(record, index + 1, state)).join('')
+      : `&lt;tr&gt;&lt;td colspan="${config.emptyColspan}"&gt;No records found.&lt;/td&gt;&lt;/tr&gt;`;
+  };
+
+  const loadRecords = async (search = '') =&gt; {
+    const endpoint = search ? `${config.endpoint}?search=${encodeURIComponent(search)}` : config.endpoint;
+    const response = await window.apiRequest(endpoint);
+    state.records = response.data;
+    renderTable();
+
+    if (state.currentId) {
+      const currentRecord = getRecordById(state.currentId);
+      if (currentRecord) {
+        populateForm(currentRecord);
+        return;
+      }
+    }
+
+    if (state.records[0]) {
+      populateForm(state.records[0]);
+    } else {
+      resetForm();
+    }
+  };
+
+  const removeRecord = async (id) =&gt; {
+    if (!window.confirm('Delete this record?')) {
+      return;
+    }
+
+    await window.apiRequest(`${config.endpoint}/${id}`, { method: 'DELETE' });
+    window.showMessage(config.messageId, 'Record deleted successfully.');
+    await loadRecords(searchInput?.value || '');
+  };
+
+  const navigate = async (direction) =&gt; {
+    const query = new URLSearchParams({
+      direction,
+      ...(state.currentId ? { currentId: state.currentId } : {}),
+    });
+
+    const response = await window.apiRequest(`${config.endpoint}/navigate?${query.toString()}`);
+    populateForm(response.data);
+  };
+
+  form.addEventListener('submit', async (event) =&gt; {
+    event.preventDefault();
+    window.clearMessage(config.messageId);
+
+    try {
+      const rawData = window.formToObject(form);
+      const id = rawData.id;
+      delete rawData.id;
+
+      const payload = config.preparePayload ? config.preparePayload(rawData, state) : rawData;
+      const response = await window.apiRequest(id ? `${config.endpoint}/${id}` : config.endpoint, {
+        method: id ? 'PUT' : 'POST',
+        body: JSON.stringify(payload),
+      });
+
+      window.showMessage(config.messageId, response.message || 'Saved successfully.');
+      await loadRecords(searchInput?.value || '');
+
+      const latestRecord = id ? getRecordById(id) : response.data;
+      if (latestRecord) {
+        populateForm(latestRecord);
+      }
+
+      if (config.afterSave) {
+        config.afterSave(response, state);
+      }
+    } catch (error) {
+      window.showMessage(config.messageId, error.message, 'error');
+    }
+  });
+
+  if (deleteButton) {
+    deleteButton.addEventListener('click', async () =&gt; {
+      if (!state.currentId) {
+        window.showMessage(config.messageId, 'Select a record first.', 'error');
+        return;
+      }
+
+      try {
+        await removeRecord(state.currentId);
+      } catch (error) {
+        window.showMessage(config.messageId, error.message, 'error');
+      }
+    });
+  }
+
+  document.getElementById(config.resetButtonId)?.addEventListener('click', () =&gt; {
+    resetForm();
+    window.clearMessage(config.messageId);
+  });
+
+  document.getElementById(config.searchButtonId)?.addEventListener('click', async () =&gt; {
+    try {
+      await loadRecords(searchInput?.value || '');
+    } catch (error) {
+      window.showMessage(config.messageId, error.message, 'error');
+    }
+  });
+
+  searchInput?.addEventListener('keydown', async (event) =&gt; {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      await loadRecords(searchInput.value || '');
+    }
+  });
+
+  document.querySelectorAll(`[data-nav-group="${config.navGroup}"] [data-direction]`).forEach((button) =&gt; {
+    button.addEventListener('click', async () =&gt; {
+      try {
+        await navigate(button.dataset.direction);
+      } catch (error) {
+        window.showMessage(config.messageId, error.message, 'error');
+      }
+    });
+  });
+
+  tableBody.addEventListener('click', async (event) =&gt; {
+    const target = event.target.closest('[data-action]');
+    if (!target) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const id = target.dataset.id;
+    const action = target.dataset.action;
+    const record = getRecordById(id);
+
+    try {
+      if (action === 'edit' &amp;&amp; record) {
+        populateForm(record);
+      } else if (action === 'delete') {
+        await removeRecord(id);
+      } else if (config.onTableAction) {
+        await config.onTableAction(action, id, record, state);
+      }
+    } catch (error) {
+      window.showMessage(config.messageId, error.message, 'error');
+    }
+  });
+
+  (async () =&gt; {
+    try {
+      if (config.beforeInit) {
+        state.lookups = await config.beforeInit();
+      }
+      if (config.onLookupsLoaded) {
+        config.onLookupsLoaded(state.lookups, state);
+      }
+      resetForm();
+      await loadRecords();
+    } catch (error) {
+      window.showMessage(config.messageId, error.message, 'error');
+    }
+  })();
+}
+
+window.createCrudModule = createCrudModule;
+</pre><h2>frontend/js/login.js</h2><pre>document.addEventListener('DOMContentLoaded', () =&gt; {
+  const form = document.getElementById('loginForm');
+
+  form.addEventListener('submit', async (event) =&gt; {
+    event.preventDefault();
+    window.clearMessage('loginMessage');
+
+    try {
+      const payload = window.formToObject(form);
+      const response = await window.apiRequest('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+
+      window.showMessage('loginMessage', response.message);
+      window.location.href = '/dashboard.html';
+    } catch (error) {
+      window.showMessage('loginMessage', error.message, 'error');
+    }
+  });
+});
+</pre><h2>frontend/js/dashboard.js</h2><pre>document.addEventListener('DOMContentLoaded', async () =&gt; {
+  try {
+    const response = await window.apiRequest('/api/dashboard/stats');
+    const stats = response.data.stats;
+    const recentAppointments = response.data.recentAppointments;
+
+    const statsGrid = document.getElementById('statsGrid');
+    statsGrid.innerHTML = `
+      &lt;article class="stat-card"&gt;
+        &lt;h4&gt;Total Admins&lt;/h4&gt;
+        &lt;strong&gt;${stats.total_admins}&lt;/strong&gt;
+      &lt;/article&gt;
+      &lt;article class="stat-card"&gt;
+        &lt;h4&gt;Total Users&lt;/h4&gt;
+        &lt;strong&gt;${stats.total_users}&lt;/strong&gt;
+      &lt;/article&gt;
+      &lt;article class="stat-card"&gt;
+        &lt;h4&gt;Total Parlours&lt;/h4&gt;
+        &lt;strong&gt;${stats.total_parlours}&lt;/strong&gt;
+      &lt;/article&gt;
+      &lt;article class="stat-card"&gt;
+        &lt;h4&gt;Total Categories&lt;/h4&gt;
+        &lt;strong&gt;${stats.total_categories}&lt;/strong&gt;
+      &lt;/article&gt;
+      &lt;article class="stat-card"&gt;
+        &lt;h4&gt;Total Services&lt;/h4&gt;
+        &lt;strong&gt;${stats.total_services}&lt;/strong&gt;
+      &lt;/article&gt;
+      &lt;article class="stat-card"&gt;
+        &lt;h4&gt;Total Appointments&lt;/h4&gt;
+        &lt;strong&gt;${stats.total_appointments}&lt;/strong&gt;
+      &lt;/article&gt;
+      &lt;article class="stat-card"&gt;
+        &lt;h4&gt;Total Revenue&lt;/h4&gt;
+        &lt;strong&gt;${window.formatCurrency(stats.total_revenue)}&lt;/strong&gt;
+      &lt;/article&gt;
+      &lt;article class="stat-card"&gt;
+        &lt;h4&gt;Project Readiness&lt;/h4&gt;
+        &lt;strong&gt;Complete&lt;/strong&gt;
+      &lt;/article&gt;
+    `;
+
+    document.getElementById('recentAppointmentsTable').innerHTML = recentAppointments.length
+      ? recentAppointments
+          .map(
+            (appointment) =&gt; `
+              &lt;tr&gt;
+                &lt;td&gt;#${appointment.id}&lt;/td&gt;
+                &lt;td&gt;${window.escapeHtml(appointment.name)}&lt;/td&gt;
+                &lt;td&gt;${window.escapeHtml(appointment.service)}&lt;/td&gt;
+                &lt;td&gt;${window.escapeHtml(appointment.appt_date)} ${window.escapeHtml(appointment.appt_time)}&lt;/td&gt;
+                &lt;td&gt;${window.renderStatusChip(appointment.status)}&lt;/td&gt;
+                &lt;td&gt;${window.formatCurrency(appointment.total_bill)}&lt;/td&gt;
+              &lt;/tr&gt;
+            `
+          )
+          .join('')
+      : '&lt;tr&gt;&lt;td colspan="6"&gt;No recent appointments found.&lt;/td&gt;&lt;/tr&gt;';
+  } catch (error) {
+    window.showMessage('dashboardMessage', error.message, 'error');
+  }
+});
+</pre><h2>frontend/js/admins.js</h2><pre>document.addEventListener('DOMContentLoaded', () =&gt; {
+  window.createCrudModule({
+    endpoint: '/api/admins',
+    formId: 'adminForm',
+    tableBodyId: 'adminTableBody',
+    searchInputId: 'adminSearchInput',
+    searchButtonId: 'adminSearchButton',
+    resetButtonId: 'adminResetButton',
+    deleteButtonId: 'adminDeleteButton',
+    navigatorLabelId: 'adminNavigatorLabel',
+    navGroup: 'admins',
+    messageId: 'adminMessage',
+    emptyColspan: 7,
+    defaultValues: {
+      type: 'manager',
+      status: 'active',
+    },
+    recordLabel: (record) =&gt; record.name,
+    renderRow: (record) =&gt; `
+      &lt;tr&gt;
+        &lt;td&gt;#${record.id}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.name)}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.email)}&lt;/td&gt;
+        &lt;td&gt;${window.renderStatusChip(record.type)}&lt;/td&gt;
+        &lt;td&gt;${window.renderStatusChip(record.status)}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.date)}&lt;/td&gt;
+        &lt;td&gt;
+          &lt;div class="table-actions"&gt;
+            &lt;button type="button" class="mini-button" data-action="edit" data-id="${record.id}"&gt;Edit&lt;/button&gt;
+            &lt;button type="button" class="mini-button" data-action="delete" data-id="${record.id}"&gt;Delete&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    `,
+  });
+});
+</pre><h2>frontend/js/users.js</h2><pre>document.addEventListener('DOMContentLoaded', () =&gt; {
+  window.createCrudModule({
+    endpoint: '/api/users',
+    formId: 'userForm',
+    tableBodyId: 'userTableBody',
+    searchInputId: 'userSearchInput',
+    searchButtonId: 'userSearchButton',
+    resetButtonId: 'userResetButton',
+    deleteButtonId: 'userDeleteButton',
+    navigatorLabelId: 'userNavigatorLabel',
+    navGroup: 'users',
+    messageId: 'userMessage',
+    emptyColspan: 7,
+    defaultValues: {
+      status: 'active',
+      is_parlour: '0',
+    },
+    preparePayload: (data) =&gt; ({
+      ...data,
+      is_parlour: Number(data.is_parlour || 0),
+    }),
+    recordLabel: (record) =&gt; record.name,
+    renderRow: (record) =&gt; `
+      &lt;tr&gt;
+        &lt;td&gt;#${record.id}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.name)}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.mobile)}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.email)}&lt;/td&gt;
+        &lt;td&gt;${record.is_parlour ? 'Yes' : 'No'}&lt;/td&gt;
+        &lt;td&gt;${window.renderStatusChip(record.status)}&lt;/td&gt;
+        &lt;td&gt;
+          &lt;div class="table-actions"&gt;
+            &lt;button type="button" class="mini-button" data-action="edit" data-id="${record.id}"&gt;Edit&lt;/button&gt;
+            &lt;button type="button" class="mini-button" data-action="delete" data-id="${record.id}"&gt;Delete&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    `,
+  });
+});
+</pre><h2>frontend/js/categories.js</h2><pre>document.addEventListener('DOMContentLoaded', () =&gt; {
+  window.createCrudModule({
+    endpoint: '/api/categories',
+    formId: 'categoryForm',
+    tableBodyId: 'categoryTableBody',
+    searchInputId: 'categorySearchInput',
+    searchButtonId: 'categorySearchButton',
+    resetButtonId: 'categoryResetButton',
+    deleteButtonId: 'categoryDeleteButton',
+    navigatorLabelId: 'categoryNavigatorLabel',
+    navGroup: 'categories',
+    messageId: 'categoryMessage',
+    emptyColspan: 6,
+    defaultValues: {
+      status: 'active',
+    },
+    beforeInit: async () =&gt; {
+      const response = await window.apiRequest('/api/admins');
+      return { admins: response.data };
+    },
+    onLookupsLoaded: (lookups) =&gt; {
+      window.populateSelect('categoryCreatedBy', lookups.admins, {
+        valueKey: 'id',
+        labelKey: 'name',
+        placeholder: 'Select admin',
+      });
+    },
+    preparePayload: (data) =&gt; ({
+      ...data,
+      created_by: Number(data.created_by),
+    }),
+    recordLabel: (record) =&gt; record.title,
+    renderRow: (record) =&gt; `
+      &lt;tr&gt;
+        &lt;td&gt;#${record.id}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.title)}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.created_by_name || '')}&lt;/td&gt;
+        &lt;td&gt;${window.renderStatusChip(record.status)}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.date)}&lt;/td&gt;
+        &lt;td&gt;
+          &lt;div class="table-actions"&gt;
+            &lt;button type="button" class="mini-button" data-action="edit" data-id="${record.id}"&gt;Edit&lt;/button&gt;
+            &lt;button type="button" class="mini-button" data-action="delete" data-id="${record.id}"&gt;Delete&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    `,
+  });
+});
+</pre><h2>frontend/js/services.js</h2><pre>document.addEventListener('DOMContentLoaded', () =&gt; {
+  window.createCrudModule({
+    endpoint: '/api/services',
+    formId: 'serviceForm',
+    tableBodyId: 'serviceTableBody',
+    searchInputId: 'serviceSearchInput',
+    searchButtonId: 'serviceSearchButton',
+    resetButtonId: 'serviceResetButton',
+    deleteButtonId: 'serviceDeleteButton',
+    navigatorLabelId: 'serviceNavigatorLabel',
+    navGroup: 'services',
+    messageId: 'serviceMessage',
+    emptyColspan: 7,
+    defaultValues: {
+      status: 'active',
+    },
+    beforeInit: async () =&gt; {
+      const [categoriesResponse, usersResponse] = await Promise.all([
+        window.apiRequest('/api/categories'),
+        window.apiRequest('/api/users'),
+      ]);
+
+      return {
+        categories: categoriesResponse.data,
+        parlours: usersResponse.data.filter((user) =&gt; Number(user.is_parlour) === 1),
+      };
+    },
+    onLookupsLoaded: (lookups) =&gt; {
+      window.populateSelect('serviceType', lookups.categories, {
+        valueKey: 'id',
+        labelKey: 'title',
+        placeholder: 'Select category',
+      });
+      window.populateSelect('serviceCreatedBy', lookups.parlours, {
+        valueKey: 'id',
+        labelKey: 'name',
+        placeholder: 'Select parlour',
+      });
+    },
+    preparePayload: (data) =&gt; ({
+      ...data,
+      service_type: Number(data.service_type),
+      created_by: Number(data.created_by),
+      price: Number(data.price),
+    }),
+    recordLabel: (record) =&gt; record.title,
+    renderRow: (record) =&gt; `
+      &lt;tr&gt;
+        &lt;td&gt;#${record.id}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.title)}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.category_title || '')}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.created_by_name || '')}&lt;/td&gt;
+        &lt;td&gt;${window.formatCurrency(record.price)}&lt;/td&gt;
+        &lt;td&gt;${window.renderStatusChip(record.status)}&lt;/td&gt;
+        &lt;td&gt;
+          &lt;div class="table-actions"&gt;
+            &lt;button type="button" class="mini-button" data-action="edit" data-id="${record.id}"&gt;Edit&lt;/button&gt;
+            &lt;button type="button" class="mini-button" data-action="delete" data-id="${record.id}"&gt;Delete&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    `,
+  });
+});
+</pre><h2>frontend/js/appointments.js</h2><pre>document.addEventListener('DOMContentLoaded', () =&gt; {
+  const state = {
+    appointments: [],
+    services: [],
+    users: [],
+    currentId: null,
+  };
+
+  const form = document.getElementById('appointmentForm');
+  const tableBody = document.getElementById('appointmentTableBody');
+  const serviceSelect = document.getElementById('appointmentServices');
+  const searchInput = document.getElementById('appointmentSearchInput');
+  const navigatorLabel = document.getElementById('appointmentNavigatorLabel');
+
+  const renderPreviewFromSelection = () =&gt; {
+    const selectedIds = Array.from(serviceSelect.selectedOptions).map((option) =&gt; Number(option.value));
+    const selectedServices = state.services.filter((service) =&gt; selectedIds.includes(Number(service.id)));
+    const preview = {
+      items: selectedServices.map((service) =&gt; ({
+        title: service.title,
+        price: service.price,
+      })),
+      total: selectedServices.reduce((sum, service) =&gt; sum + Number(service.price), 0),
+    };
+    window.renderInvoice('invoicePreview', preview);
+  };
+
+  const populateFormWithAppointment = async (appointment) =&gt; {
+    if (!appointment) {
+      state.currentId = null;
+      window.resetFormState(form, { status: 'booked' });
+      navigatorLabel.textContent = 'Current Record: none selected';
+      renderPreviewFromSelection();
+      return;
+    }
+
+    const invoiceResponse = await window.apiRequest(`/api/appointments/${appointment.id}/invoice`);
+    const serviceIds = invoiceResponse.data.items.map((item) =&gt; String(item.service_id));
+    state.currentId = appointment.id;
+    window.setFormValues(form, {
+      ...appointment,
+      serviceIds,
+    });
+    navigatorLabel.textContent = `Current Record: #${appointment.id} - ${appointment.name}`;
+    window.renderInvoice('invoicePreview', invoiceResponse.data);
+  };
+
+  const renderTable = () =&gt; {
+    tableBody.innerHTML = state.appointments.length
+      ? state.appointments
+          .map(
+            (appointment) =&gt; `
+              &lt;tr&gt;
+                &lt;td&gt;#${appointment.id}&lt;/td&gt;
+                &lt;td&gt;${window.escapeHtml(appointment.name)}&lt;/td&gt;
+                &lt;td&gt;${window.escapeHtml(appointment.service)}&lt;/td&gt;
+                &lt;td&gt;${window.escapeHtml(appointment.appt_date)} ${window.escapeHtml(appointment.appt_time)}&lt;/td&gt;
+                &lt;td&gt;${window.escapeHtml(appointment.parlour_name || '')}&lt;/td&gt;
+                &lt;td&gt;${window.renderStatusChip(appointment.status)}&lt;/td&gt;
+                &lt;td&gt;${window.formatCurrency(appointment.total_bill)}&lt;/td&gt;
+                &lt;td&gt;
+                  &lt;div class="table-actions"&gt;
+                    &lt;button type="button" class="mini-button" data-action="edit" data-id="${appointment.id}"&gt;Edit&lt;/button&gt;
+                    &lt;button type="button" class="mini-button" data-action="bill" data-id="${appointment.id}"&gt;Bill&lt;/button&gt;
+                    &lt;button type="button" class="mini-button" data-action="delete" data-id="${appointment.id}"&gt;Delete&lt;/button&gt;
+                  &lt;/div&gt;
+                &lt;/td&gt;
+              &lt;/tr&gt;
+            `
+          )
+          .join('')
+      : '&lt;tr&gt;&lt;td colspan="8"&gt;No appointments found.&lt;/td&gt;&lt;/tr&gt;';
+  };
+
+  const loadLookups = async () =&gt; {
+    const [usersResponse, servicesResponse] = await Promise.all([
+      window.apiRequest('/api/users'),
+      window.apiRequest('/api/services'),
+    ]);
+
+    state.users = usersResponse.data;
+    state.services = servicesResponse.data.filter((service) =&gt; service.status === 'active');
+
+    window.populateSelect(
+      'appointmentParlour',
+      state.users.filter((user) =&gt; Number(user.is_parlour) === 1),
+      {
+        valueKey: 'id',
+        labelKey: 'name',
+        placeholder: 'Select parlour',
+      }
+    );
+
+    window.populateSelect('appointmentCreatedBy', state.users, {
+      valueKey: 'id',
+      labelKey: 'name',
+      placeholder: 'Select booking user',
+    });
+
+    const serviceOptions = state.services
+      .map(
+        (service) =&gt;
+          `&lt;option value="${service.id}"&gt;${window.escapeHtml(service.title)} - ${window.formatCurrency(service.price)}&lt;/option&gt;`
+      )
+      .join('');
+    serviceSelect.innerHTML = serviceOptions;
+  };
+
+  const loadAppointments = async (search = '') =&gt; {
+    const endpoint = search ? `/api/appointments?search=${encodeURIComponent(search)}` : '/api/appointments';
+    const response = await window.apiRequest(endpoint);
+    state.appointments = response.data;
+    renderTable();
+
+    if (state.currentId) {
+      const currentRecord = state.appointments.find((item) =&gt; Number(item.id) === Number(state.currentId));
+      if (currentRecord) {
+        await populateFormWithAppointment(currentRecord);
+        return;
+      }
+    }
+
+    if (state.appointments[0]) {
+      await populateFormWithAppointment(state.appointments[0]);
+    } else {
+      await populateFormWithAppointment(null);
+    }
+  };
+
+  const navigate = async (direction) =&gt; {
+    const query = new URLSearchParams({
+      direction,
+      ...(state.currentId ? { currentId: state.currentId } : {}),
+    });
+    const response = await window.apiRequest(`/api/appointments/navigate?${query.toString()}`);
+    await populateFormWithAppointment(response.data);
+  };
+
+  form.addEventListener('submit', async (event) =&gt; {
+    event.preventDefault();
+    window.clearMessage('appointmentMessage');
+
+    try {
+      const data = window.formToObject(form);
+      const id = data.id;
+      delete data.id;
+
+      const payload = {
+        ...data,
+        parlour: Number(data.parlour),
+        created_by: data.created_by ? Number(data.created_by) : null,
+        serviceIds: (data.serviceIds || []).map(Number),
+      };
+
+      const response = await window.apiRequest(id ? `/api/appointments/${id}` : '/api/appointments', {
+        method: id ? 'PUT' : 'POST',
+        body: JSON.stringify(payload),
+      });
+
+      window.showMessage('appointmentMessage', response.message);
+      await loadAppointments(searchInput.value || '');
+      await populateFormWithAppointment(response.data);
+    } catch (error) {
+      window.showMessage('appointmentMessage', error.message, 'error');
+    }
+  });
+
+  document.getElementById('appointmentResetButton').addEventListener('click', async () =&gt; {
+    state.currentId = null;
+    window.resetFormState(form, { status: 'booked' });
+    renderPreviewFromSelection();
+    navigatorLabel.textContent = 'Current Record: none selected';
+  });
+
+  document.getElementById('appointmentDeleteButton').addEventListener('click', async () =&gt; {
+    if (!state.currentId) {
+      window.showMessage('appointmentMessage', 'Select an appointment first.', 'error');
+      return;
+    }
+
+    if (!window.confirm('Delete this appointment?')) {
+      return;
+    }
+
+    try {
+      await window.apiRequest(`/api/appointments/${state.currentId}`, { method: 'DELETE' });
+      window.showMessage('appointmentMessage', 'Appointment deleted successfully.');
+      await loadAppointments(searchInput.value || '');
+    } catch (error) {
+      window.showMessage('appointmentMessage', error.message, 'error');
+    }
+  });
+
+  document.getElementById('appointmentSearchButton').addEventListener('click', async () =&gt; {
+    try {
+      await loadAppointments(searchInput.value || '');
+    } catch (error) {
+      window.showMessage('appointmentMessage', error.message, 'error');
+    }
+  });
+
+  searchInput.addEventListener('keydown', async (event) =&gt; {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      await loadAppointments(searchInput.value || '');
+    }
+  });
+
+  serviceSelect.addEventListener('change', renderPreviewFromSelection);
+
+  document.querySelectorAll('.navigator [data-direction]').forEach((button) =&gt; {
+    button.addEventListener('click', async () =&gt; {
+      try {
+        await navigate(button.dataset.direction);
+      } catch (error) {
+        window.showMessage('appointmentMessage', error.message, 'error');
+      }
+    });
+  });
+
+  tableBody.addEventListener('click', async (event) =&gt; {
+    const target = event.target.closest('[data-action]');
+    if (!target) {
+      return;
+    }
+
+    const id = Number(target.dataset.id);
+    const action = target.dataset.action;
+    const record = state.appointments.find((appointment) =&gt; Number(appointment.id) === id);
+
+    try {
+      if (action === 'edit' &amp;&amp; record) {
+        await populateFormWithAppointment(record);
+      }
+
+      if (action === 'bill') {
+        window.location.href = `/billing.html?appointment=${id}`;
+      }
+
+      if (action === 'delete') {
+        state.currentId = id;
+        document.getElementById('appointmentDeleteButton').click();
+      }
+    } catch (error) {
+      window.showMessage('appointmentMessage', error.message, 'error');
+    }
+  });
+
+  (async () =&gt; {
+    try {
+      await loadLookups();
+      window.resetFormState(form, { status: 'booked' });
+      renderPreviewFromSelection();
+      await loadAppointments();
+    } catch (error) {
+      window.showMessage('appointmentMessage', error.message, 'error');
+    }
+  })();
+});
+</pre><h2>frontend/js/billing.js</h2><pre>document.addEventListener('DOMContentLoaded', async () =&gt; {
+  const appointmentSelect = document.getElementById('billingAppointmentSelect');
+  const params = new URLSearchParams(window.location.search);
+  const preselectedAppointmentId = params.get('appointment');
+
+  const loadInvoice = async (appointmentId) =&gt; {
+    if (!appointmentId) {
+      window.showMessage('billingMessage', 'Select an appointment to load its invoice.', 'error');
+      return;
+    }
+
+    try {
+      const response = await window.apiRequest(`/api/appointments/${appointmentId}/invoice`);
+      window.renderInvoice('billingInvoiceContainer', response.data);
+      window.clearMessage('billingMessage');
+    } catch (error) {
+      window.showMessage('billingMessage', error.message, 'error');
+    }
+  };
+
+  document.getElementById('loadInvoiceButton').addEventListener('click', async () =&gt; {
+    await loadInvoice(appointmentSelect.value);
+  });
+
+  document.getElementById('printBillButton').addEventListener('click', () =&gt; {
+    window.print();
+  });
+
+  try {
+    const response = await window.apiRequest('/api/appointments');
+    const appointments = response.data;
+
+    appointmentSelect.innerHTML =
+      '&lt;option value=""&gt;Select appointment&lt;/option&gt;' +
+      appointments
+        .map(
+          (appointment) =&gt;
+            `&lt;option value="${appointment.id}"&gt;#${appointment.id} - ${window.escapeHtml(
+              appointment.name
+            )} (${window.escapeHtml(appointment.appt_date)})&lt;/option&gt;`
+        )
+        .join('');
+
+    if (preselectedAppointmentId) {
+      appointmentSelect.value = preselectedAppointmentId;
+      await loadInvoice(preselectedAppointmentId);
+    } else if (appointments[0]) {
+      appointmentSelect.value = appointments[0].id;
+      await loadInvoice(appointments[0].id);
+    } else {
+      window.renderInvoice('billingInvoiceContainer', null);
+    }
+  } catch (error) {
+    window.showMessage('billingMessage', error.message, 'error');
+  }
+});
+</pre><h2>frontend/js/settings.js</h2><pre>document.addEventListener('DOMContentLoaded', () =&gt; {
+  window.createCrudModule({
+    endpoint: '/api/settings',
+    formId: 'settingsForm',
+    tableBodyId: 'settingsTableBody',
+    searchInputId: 'settingsSearchInput',
+    searchButtonId: 'settingsSearchButton',
+    resetButtonId: 'settingsResetButton',
+    deleteButtonId: 'settingsDeleteButton',
+    navigatorLabelId: 'settingsNavigatorLabel',
+    navGroup: 'settings',
+    messageId: 'settingsMessage',
+    emptyColspan: 5,
+    recordLabel: (record) =&gt; record.site_title,
+    renderRow: (record) =&gt; `
+      &lt;tr&gt;
+        &lt;td&gt;#${record.id}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.site_title)}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.meta_title)}&lt;/td&gt;
+        &lt;td&gt;${window.escapeHtml(record.date)}&lt;/td&gt;
+        &lt;td&gt;
+          &lt;div class="table-actions"&gt;
+            &lt;button type="button" class="mini-button" data-action="edit" data-id="${record.id}"&gt;Edit&lt;/button&gt;
+            &lt;button type="button" class="mini-button" data-action="delete" data-id="${record.id}"&gt;Delete&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    `,
+  });
+});
+</pre></body></html>
