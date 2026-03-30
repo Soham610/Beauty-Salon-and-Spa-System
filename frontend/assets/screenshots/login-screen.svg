@@ -1,0 +1,22 @@
+<svg width="1280" height="800" viewBox="0 0 1280 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="800" rx="28" fill="#F6EDE5"/>
+  <rect x="56" y="56" width="1168" height="688" rx="28" fill="#FFF9F4"/>
+  <rect x="96" y="96" width="640" height="608" rx="28" fill="url(#paint0_linear)"/>
+  <rect x="776" y="96" width="408" height="608" rx="28" fill="white" stroke="#E4C9B6"/>
+  <text x="144" y="180" fill="#FFF8F2" font-family="Trebuchet MS" font-size="58" font-weight="700">Beauty and Salon</text>
+  <text x="144" y="246" fill="#FFF8F2" font-family="Trebuchet MS" font-size="58" font-weight="700">Management System</text>
+  <text x="144" y="330" fill="#FFEFE5" font-family="Trebuchet MS" font-size="28">Admin Login | CRUD | Billing | Search</text>
+  <rect x="820" y="220" width="320" height="54" rx="14" fill="#FFF7F1" stroke="#E2C6B4"/>
+  <rect x="820" y="314" width="320" height="54" rx="14" fill="#FFF7F1" stroke="#E2C6B4"/>
+  <rect x="820" y="418" width="320" height="58" rx="16" fill="#C96B4B"/>
+  <text x="820" y="194" fill="#7A5D49" font-family="Trebuchet MS" font-size="24">Admin Email</text>
+  <text x="820" y="288" fill="#7A5D49" font-family="Trebuchet MS" font-size="24">Password</text>
+  <text x="919" y="455" fill="white" font-family="Trebuchet MS" font-size="26" font-weight="700">Login</text>
+  <defs>
+    <linearGradient id="paint0_linear" x1="96" y1="96" x2="736" y2="704" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3F2318"/>
+      <stop offset="0.6" stop-color="#C96B4B"/>
+      <stop offset="1" stop-color="#F1B08C"/>
+    </linearGradient>
+  </defs>
+</svg>

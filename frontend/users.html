@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Management | Beauty and Salon Management System</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body data-protected="true" data-page="users">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>BeautyHub Admin</h1>
+          <p>Manage customers and parlour profiles from one place.</p>
+        </div>
+        <nav class="nav-links">
+          <a href="/dashboard.html" data-nav="dashboard">Dashboard</a>
+          <a href="/admins.html" data-nav="admins">Admins</a>
+          <a href="/users.html" data-nav="users">Users</a>
+          <a href="/categories.html" data-nav="categories">Categories</a>
+          <a href="/services.html" data-nav="services">Services</a>
+          <a href="/appointments.html" data-nav="appointments">Appointments</a>
+          <a href="/billing.html" data-nav="billing">Billing</a>
+          <a href="/settings.html" data-nav="settings">Settings</a>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="admin-badge">Signed in as <span data-admin-name>Loading...</span></div>
+          <button class="button ghost" data-logout>Logout</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="page-header">
+          <div>
+            <h2>User Management</h2>
+            <p>Search users by name and maintain both customer and parlour records.</p>
+          </div>
+        </section>
+
+        <div id="userMessage" class="message hidden"></div>
+
+        <section class="panel-grid grid-two">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>User Form</h3>
+                <p class="helper-text">Set “Is Parlour” to Yes for salon owners or service providers.</p>
+              </div>
+            </div>
+            <form id="userForm" class="form-grid">
+              <input type="hidden" name="id" />
+              <div class="field-group">
+                <label>Name</label>
+                <input class="input" name="name" required />
+              </div>
+              <div class="field-group">
+                <label>Email</label>
+                <input class="input" type="email" name="email" required />
+              </div>
+              <div class="field-group">
+                <label>Mobile</label>
+                <input class="input" name="mobile" required />
+              </div>
+              <div class="field-group">
+                <label>Password</label>
+                <input class="input" name="password" required />
+              </div>
+              <div class="field-group">
+                <label>Profile Image URL</label>
+                <input class="input" name="file" />
+              </div>
+              <div class="field-group">
+                <label>Status</label>
+                <select class="select" name="status" required>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>Is Parlour</label>
+                <select class="select" name="is_parlour" required>
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+              <div class="field-group full-width">
+                <label>About</label>
+                <textarea class="textarea" name="about"></textarea>
+              </div>
+              <div class="button-row full-width">
+                <button type="submit" class="button">Save User</button>
+                <button type="button" class="button secondary" id="userResetButton">Reset</button>
+                <button type="button" class="button danger" id="userDeleteButton">Delete Current</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>User Records</h3>
+                <p class="helper-text">Required academic search feature: search users by name.</p>
+              </div>
+            </div>
+            <div class="toolbar">
+              <input class="input" id="userSearchInput" placeholder="Search users by name" />
+              <button class="button secondary" id="userSearchButton">Search</button>
+            </div>
+            <div class="table-wrap" style="margin-top: 14px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>Parlour</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="userTableBody"></tbody>
+              </table>
+            </div>
+            <div class="navigator" data-nav-group="users" style="margin-top: 14px;">
+              <button class="mini-button" data-direction="first">First</button>
+              <button class="mini-button" data-direction="previous">Previous</button>
+              <button class="mini-button" data-direction="next">Next</button>
+              <button class="mini-button" data-direction="last">Last</button>
+              <span id="userNavigatorLabel">Current Record: none selected</span>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/module-page.js"></script>
+    <script src="/js/users.js"></script>
+  </body>
+</html>

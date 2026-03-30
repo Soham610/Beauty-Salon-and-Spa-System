@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Billing | Beauty and Salon Management System</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body data-protected="true" data-page="billing">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>BeautyHub Admin</h1>
+          <p>Billing view for appointment invoices and printable total amounts.</p>
+        </div>
+        <nav class="nav-links">
+          <a href="/dashboard.html" data-nav="dashboard">Dashboard</a>
+          <a href="/admins.html" data-nav="admins">Admins</a>
+          <a href="/users.html" data-nav="users">Users</a>
+          <a href="/categories.html" data-nav="categories">Categories</a>
+          <a href="/services.html" data-nav="services">Services</a>
+          <a href="/appointments.html" data-nav="appointments">Appointments</a>
+          <a href="/billing.html" data-nav="billing">Billing</a>
+          <a href="/settings.html" data-nav="settings">Settings</a>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="admin-badge">Signed in as <span data-admin-name>Loading...</span></div>
+          <button class="button ghost" data-logout>Logout</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="page-header">
+          <div>
+            <h2>Billing</h2>
+            <p>Display service name, individual price, and total amount for any appointment.</p>
+          </div>
+          <div class="header-actions">
+            <button class="button success" id="printBillButton">Print Invoice</button>
+          </div>
+        </section>
+
+        <div id="billingMessage" class="message hidden"></div>
+
+        <section class="card">
+          <div class="toolbar">
+            <select class="select" id="billingAppointmentSelect" style="min-width: 280px;"></select>
+            <button class="button" id="loadInvoiceButton">Load Invoice</button>
+          </div>
+        </section>
+
+        <section class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <div>
+              <h3>Invoice Details</h3>
+              <p class="helper-text">Generated directly from appointment records and related service prices.</p>
+            </div>
+          </div>
+          <div id="billingInvoiceContainer"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/billing.js"></script>
+  </body>
+</html>

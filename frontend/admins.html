@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Management | Beauty and Salon Management System</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body data-protected="true" data-page="admins">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>BeautyHub Admin</h1>
+          <p>Complete CRUD operations for administrator records.</p>
+        </div>
+        <nav class="nav-links">
+          <a href="/dashboard.html" data-nav="dashboard">Dashboard</a>
+          <a href="/admins.html" data-nav="admins">Admins</a>
+          <a href="/users.html" data-nav="users">Users</a>
+          <a href="/categories.html" data-nav="categories">Categories</a>
+          <a href="/services.html" data-nav="services">Services</a>
+          <a href="/appointments.html" data-nav="appointments">Appointments</a>
+          <a href="/billing.html" data-nav="billing">Billing</a>
+          <a href="/settings.html" data-nav="settings">Settings</a>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="admin-badge">Signed in as <span data-admin-name>Loading...</span></div>
+          <button class="button ghost" data-logout>Logout</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="page-header">
+          <div>
+            <h2>Admin Management</h2>
+            <p>Create, update, search, and delete admin accounts used to control the system.</p>
+          </div>
+        </section>
+
+        <div id="adminMessage" class="message hidden"></div>
+
+        <section class="panel-grid grid-two">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>Admin Form</h3>
+                <p class="helper-text">All fields are required for this academic demo.</p>
+              </div>
+            </div>
+            <form id="adminForm" class="form-grid">
+              <input type="hidden" name="id" />
+              <div class="field-group">
+                <label for="adminName">Name</label>
+                <input class="input" id="adminName" name="name" required />
+              </div>
+              <div class="field-group">
+                <label for="adminEmail">Email</label>
+                <input class="input" type="email" id="adminEmail" name="email" required />
+              </div>
+              <div class="field-group">
+                <label for="adminPassword">Password</label>
+                <input class="input" id="adminPassword" name="password" required />
+              </div>
+              <div class="field-group">
+                <label for="adminType">Type</label>
+                <select class="select" id="adminType" name="type" required>
+                  <option value="super_admin">Super Admin</option>
+                  <option value="manager">Manager</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="adminStatus">Status</label>
+                <select class="select" id="adminStatus" name="status" required>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div class="button-row full-width">
+                <button type="submit" class="button">Save Admin</button>
+                <button type="button" class="button secondary" id="adminResetButton">Reset</button>
+                <button type="button" class="button danger" id="adminDeleteButton">Delete Current</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>Admin Records</h3>
+                <p class="helper-text">Use search and record navigation to demonstrate browsing features.</p>
+              </div>
+            </div>
+            <div class="toolbar">
+              <input class="input" id="adminSearchInput" placeholder="Search admins by name or email" />
+              <button class="button secondary" id="adminSearchButton">Search</button>
+            </div>
+            <div class="table-wrap" style="margin-top: 14px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminTableBody"></tbody>
+              </table>
+            </div>
+            <div class="navigator" data-nav-group="admins" style="margin-top: 14px;">
+              <button class="mini-button" data-direction="first">First</button>
+              <button class="mini-button" data-direction="previous">Previous</button>
+              <button class="mini-button" data-direction="next">Next</button>
+              <button class="mini-button" data-direction="last">Last</button>
+              <span id="adminNavigatorLabel">Current Record: none selected</span>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/module-page.js"></script>
+    <script src="/js/admins.js"></script>
+  </body>
+</html>

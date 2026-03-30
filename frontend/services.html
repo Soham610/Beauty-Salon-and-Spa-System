@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Services | Beauty and Salon Management System</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body data-protected="true" data-page="services">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>BeautyHub Admin</h1>
+          <p>Create and manage salon services with pricing information.</p>
+        </div>
+        <nav class="nav-links">
+          <a href="/dashboard.html" data-nav="dashboard">Dashboard</a>
+          <a href="/admins.html" data-nav="admins">Admins</a>
+          <a href="/users.html" data-nav="users">Users</a>
+          <a href="/categories.html" data-nav="categories">Categories</a>
+          <a href="/services.html" data-nav="services">Services</a>
+          <a href="/appointments.html" data-nav="appointments">Appointments</a>
+          <a href="/billing.html" data-nav="billing">Billing</a>
+          <a href="/settings.html" data-nav="settings">Settings</a>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="admin-badge">Signed in as <span data-admin-name>Loading...</span></div>
+          <button class="button ghost" data-logout>Logout</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="page-header">
+          <div>
+            <h2>Services</h2>
+            <p>Required academic feature: search services and maintain pricing used in billing.</p>
+          </div>
+        </section>
+
+        <div id="serviceMessage" class="message hidden"></div>
+
+        <section class="panel-grid grid-two">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>Service Form</h3>
+                <p class="helper-text">Every appointment bill is calculated from these service prices.</p>
+              </div>
+            </div>
+            <form id="serviceForm" class="form-grid">
+              <input type="hidden" name="id" />
+              <div class="field-group">
+                <label>Service Title</label>
+                <input class="input" name="title" required />
+              </div>
+              <div class="field-group">
+                <label>Category</label>
+                <select class="select" id="serviceType" name="service_type" required></select>
+              </div>
+              <div class="field-group">
+                <label>Parlour</label>
+                <select class="select" id="serviceCreatedBy" name="created_by" required></select>
+              </div>
+              <div class="field-group">
+                <label>Contact Mobile</label>
+                <input class="input" name="mobile" required />
+              </div>
+              <div class="field-group">
+                <label>Address</label>
+                <input class="input" name="address" required />
+              </div>
+              <div class="field-group">
+                <label>Price</label>
+                <input class="input" type="number" min="0" step="0.01" name="price" required />
+              </div>
+              <div class="field-group">
+                <label>Image URL</label>
+                <input class="input" name="file" />
+              </div>
+              <div class="field-group">
+                <label>Status</label>
+                <select class="select" name="status" required>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div class="field-group full-width">
+                <label>Details</label>
+                <textarea class="textarea" name="detail"></textarea>
+              </div>
+              <div class="button-row full-width">
+                <button type="submit" class="button">Save Service</button>
+                <button type="button" class="button secondary" id="serviceResetButton">Reset</button>
+                <button type="button" class="button danger" id="serviceDeleteButton">Delete Current</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>Service Records</h3>
+                <p class="helper-text">Search by service title and browse using First, Last, Next, Previous.</p>
+              </div>
+            </div>
+            <div class="toolbar">
+              <input class="input" id="serviceSearchInput" placeholder="Search services" />
+              <button class="button secondary" id="serviceSearchButton">Search</button>
+            </div>
+            <div class="table-wrap" style="margin-top: 14px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Parlour</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="serviceTableBody"></tbody>
+              </table>
+            </div>
+            <div class="navigator" data-nav-group="services" style="margin-top: 14px;">
+              <button class="mini-button" data-direction="first">First</button>
+              <button class="mini-button" data-direction="previous">Previous</button>
+              <button class="mini-button" data-direction="next">Next</button>
+              <button class="mini-button" data-direction="last">Last</button>
+              <span id="serviceNavigatorLabel">Current Record: none selected</span>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/module-page.js"></script>
+    <script src="/js/services.js"></script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+<svg width="1280" height="800" viewBox="0 0 1280 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="800" rx="28" fill="#F6EDE5"/>
+  <rect x="50" y="50" width="1180" height="700" rx="28" fill="#FFF9F4"/>
+  <rect x="76" y="76" width="250" height="648" rx="24" fill="#38261C"/>
+  <rect x="356" y="92" width="844" height="82" rx="24" fill="white" stroke="#E2C8B8"/>
+  <rect x="356" y="206" width="844" height="92" rx="24" fill="white" stroke="#E2C8B8"/>
+  <rect x="356" y="328" width="844" height="360" rx="24" fill="white" stroke="#E2C8B8"/>
+  <text x="392" y="142" fill="#38261C" font-family="Trebuchet MS" font-size="40" font-weight="700">Billing</text>
+  <text x="392" y="260" fill="#7A5D49" font-family="Trebuchet MS" font-size="24">Invoice for Appointment #1</text>
+  <text x="392" y="392" fill="#38261C" font-family="Trebuchet MS" font-size="24">Hair Spa</text>
+  <text x="1050" y="392" fill="#38261C" font-family="Trebuchet MS" font-size="24">₹799</text>
+  <text x="392" y="454" fill="#38261C" font-family="Trebuchet MS" font-size="24">Fruit Facial</text>
+  <text x="1040" y="454" fill="#38261C" font-family="Trebuchet MS" font-size="24">₹999</text>
+  <rect x="392" y="570" width="772" height="74" rx="18" fill="#FFF0E4"/>
+  <text x="424" y="616" fill="#38261C" font-family="Trebuchet MS" font-size="28" font-weight="700">Total Amount</text>
+  <text x="1010" y="616" fill="#38261C" font-family="Trebuchet MS" font-size="30" font-weight="700">₹1,798</text>
+</svg>

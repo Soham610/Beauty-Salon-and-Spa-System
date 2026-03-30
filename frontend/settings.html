@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings | Beauty and Salon Management System</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body data-protected="true" data-page="settings">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>BeautyHub Admin</h1>
+          <p>Maintain system-level site settings and branding fields.</p>
+        </div>
+        <nav class="nav-links">
+          <a href="/dashboard.html" data-nav="dashboard">Dashboard</a>
+          <a href="/admins.html" data-nav="admins">Admins</a>
+          <a href="/users.html" data-nav="users">Users</a>
+          <a href="/categories.html" data-nav="categories">Categories</a>
+          <a href="/services.html" data-nav="services">Services</a>
+          <a href="/appointments.html" data-nav="appointments">Appointments</a>
+          <a href="/billing.html" data-nav="billing">Billing</a>
+          <a href="/settings.html" data-nav="settings">Settings</a>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="admin-badge">Signed in as <span data-admin-name>Loading...</span></div>
+          <button class="button ghost" data-logout>Logout</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="page-header">
+          <div>
+            <h2>Settings</h2>
+            <p>CRUD page for the `settings` table required by the project schema.</p>
+          </div>
+        </section>
+
+        <div id="settingsMessage" class="message hidden"></div>
+
+        <section class="panel-grid grid-two">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>Settings Form</h3>
+                <p class="helper-text">Manage branding and metadata fields for the application.</p>
+              </div>
+            </div>
+            <form id="settingsForm" class="form-grid">
+              <input type="hidden" name="id" />
+              <div class="field-group">
+                <label>Site Title</label>
+                <input class="input" name="site_title" required />
+              </div>
+              <div class="field-group">
+                <label>Meta Title</label>
+                <input class="input" name="meta_title" required />
+              </div>
+              <div class="field-group full-width">
+                <label>Meta Tags</label>
+                <input class="input" name="meta_tags" />
+              </div>
+              <div class="field-group full-width">
+                <label>Meta Description</label>
+                <textarea class="textarea" name="meta_desc"></textarea>
+              </div>
+              <div class="field-group full-width">
+                <label>Logo URL</label>
+                <input class="input" name="logo" />
+              </div>
+              <div class="button-row full-width">
+                <button type="submit" class="button">Save Settings</button>
+                <button type="button" class="button secondary" id="settingsResetButton">Reset</button>
+                <button type="button" class="button danger" id="settingsDeleteButton">Delete Current</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>Settings Records</h3>
+                <p class="helper-text">Store one or multiple settings rows for demonstration purposes.</p>
+              </div>
+            </div>
+            <div class="toolbar">
+              <input class="input" id="settingsSearchInput" placeholder="Search settings" />
+              <button class="button secondary" id="settingsSearchButton">Search</button>
+            </div>
+            <div class="table-wrap" style="margin-top: 14px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Site Title</th>
+                    <th>Meta Title</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="settingsTableBody"></tbody>
+              </table>
+            </div>
+            <div class="navigator" data-nav-group="settings" style="margin-top: 14px;">
+              <button class="mini-button" data-direction="first">First</button>
+              <button class="mini-button" data-direction="previous">Previous</button>
+              <button class="mini-button" data-direction="next">Next</button>
+              <button class="mini-button" data-direction="last">Last</button>
+              <span id="settingsNavigatorLabel">Current Record: none selected</span>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/module-page.js"></script>
+    <script src="/js/settings.js"></script>
+  </body>
+</html>

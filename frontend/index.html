@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beauty and Salon Management System | Admin Login</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="login-page">
+    <div class="login-card">
+      <section class="login-hero">
+        <p>Database Systems Project</p>
+        <h1>Beauty and Salon Management System</h1>
+        <p>
+          Manage salons, services, categories, appointments, and invoice generation in one full-stack web
+          application.
+        </p>
+        <ul class="login-highlights">
+          <li>Complete CRUD operations for all modules</li>
+          <li>Search and record navigation support</li>
+          <li>Automatic bill generation from selected services</li>
+        </ul>
+      </section>
+
+      <section class="login-form-card">
+        <h2>Admin Login</h2>
+        <p class="helper-text">Use the sample credentials from the SQL file to enter the dashboard.</p>
+        <div id="loginMessage" class="message hidden"></div>
+        <form id="loginForm" class="panel-grid">
+          <div class="field-group">
+            <label for="email">Admin Email</label>
+            <input class="input" type="email" id="email" name="email" placeholder="admin@beautyhub.com" required />
+          </div>
+          <div class="field-group">
+            <label for="password">Password</label>
+            <input class="input" type="password" id="password" name="password" placeholder="admin123" required />
+          </div>
+          <div class="button-row">
+            <button type="submit" class="button">Login to Dashboard</button>
+          </div>
+        </form>
+        <p class="footer-note">Sample login: `admin@beautyhub.com` / `admin123`</p>
+      </section>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/login.js"></script>
+  </body>
+</html>

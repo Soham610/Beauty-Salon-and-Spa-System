@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Category Management | Beauty and Salon Management System</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body data-protected="true" data-page="categories">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>BeautyHub Admin</h1>
+          <p>Organize service categories used across the application.</p>
+        </div>
+        <nav class="nav-links">
+          <a href="/dashboard.html" data-nav="dashboard">Dashboard</a>
+          <a href="/admins.html" data-nav="admins">Admins</a>
+          <a href="/users.html" data-nav="users">Users</a>
+          <a href="/categories.html" data-nav="categories">Categories</a>
+          <a href="/services.html" data-nav="services">Services</a>
+          <a href="/appointments.html" data-nav="appointments">Appointments</a>
+          <a href="/billing.html" data-nav="billing">Billing</a>
+          <a href="/settings.html" data-nav="settings">Settings</a>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="admin-badge">Signed in as <span data-admin-name>Loading...</span></div>
+          <button class="button ghost" data-logout>Logout</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="page-header">
+          <div>
+            <h2>Categories</h2>
+            <p>Maintain category records used to classify salon services.</p>
+          </div>
+        </section>
+
+        <div id="categoryMessage" class="message hidden"></div>
+
+        <section class="panel-grid grid-two">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>Category Form</h3>
+                <p class="helper-text">Choose which admin created the category entry.</p>
+              </div>
+            </div>
+            <form id="categoryForm" class="form-grid">
+              <input type="hidden" name="id" />
+              <div class="field-group">
+                <label>Category Title</label>
+                <input class="input" name="title" required />
+              </div>
+              <div class="field-group">
+                <label>Created By</label>
+                <select class="select" id="categoryCreatedBy" name="created_by" required></select>
+              </div>
+              <div class="field-group">
+                <label>Status</label>
+                <select class="select" name="status" required>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div class="button-row full-width">
+                <button type="submit" class="button">Save Category</button>
+                <button type="button" class="button secondary" id="categoryResetButton">Reset</button>
+                <button type="button" class="button danger" id="categoryDeleteButton">Delete Current</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>Category Records</h3>
+                <p class="helper-text">Browse categories in table format and test navigation buttons.</p>
+              </div>
+            </div>
+            <div class="toolbar">
+              <input class="input" id="categorySearchInput" placeholder="Search categories" />
+              <button class="button secondary" id="categorySearchButton">Search</button>
+            </div>
+            <div class="table-wrap" style="margin-top: 14px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Created By</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="categoryTableBody"></tbody>
+              </table>
+            </div>
+            <div class="navigator" data-nav-group="categories" style="margin-top: 14px;">
+              <button class="mini-button" data-direction="first">First</button>
+              <button class="mini-button" data-direction="previous">Previous</button>
+              <button class="mini-button" data-direction="next">Next</button>
+              <button class="mini-button" data-direction="last">Last</button>
+              <span id="categoryNavigatorLabel">Current Record: none selected</span>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/module-page.js"></script>
+    <script src="/js/categories.js"></script>
+  </body>
+</html>

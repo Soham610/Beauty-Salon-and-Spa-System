@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Appointments | Beauty and Salon Management System</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body data-protected="true" data-page="appointments">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>BeautyHub Admin</h1>
+          <p>Book appointments and generate invoices directly from service prices.</p>
+        </div>
+        <nav class="nav-links">
+          <a href="/dashboard.html" data-nav="dashboard">Dashboard</a>
+          <a href="/admins.html" data-nav="admins">Admins</a>
+          <a href="/users.html" data-nav="users">Users</a>
+          <a href="/categories.html" data-nav="categories">Categories</a>
+          <a href="/services.html" data-nav="services">Services</a>
+          <a href="/appointments.html" data-nav="appointments">Appointments</a>
+          <a href="/billing.html" data-nav="billing">Billing</a>
+          <a href="/settings.html" data-nav="settings">Settings</a>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="admin-badge">Signed in as <span data-admin-name>Loading...</span></div>
+          <button class="button ghost" data-logout>Logout</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="page-header">
+          <div>
+            <h2>Appointment Booking</h2>
+            <p>Required academic feature: search appointments by date and auto-generate the service bill.</p>
+          </div>
+          <div class="header-actions">
+            <a class="button secondary" href="/billing.html">Open Billing Page</a>
+          </div>
+        </section>
+
+        <div id="appointmentMessage" class="message hidden"></div>
+
+        <section class="panel-grid grid-two">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>Appointment Form</h3>
+                <p class="helper-text">Select one or more services. The invoice preview updates instantly.</p>
+              </div>
+            </div>
+            <form id="appointmentForm" class="form-grid">
+              <input type="hidden" name="id" />
+              <div class="field-group">
+                <label>Customer Name</label>
+                <input class="input" name="name" required />
+              </div>
+              <div class="field-group">
+                <label>Email</label>
+                <input class="input" type="email" name="email" required />
+              </div>
+              <div class="field-group">
+                <label>Mobile</label>
+                <input class="input" name="mobile" required />
+              </div>
+              <div class="field-group">
+                <label>Address</label>
+                <input class="input" name="address" required />
+              </div>
+              <div class="field-group">
+                <label>Appointment Date</label>
+                <input class="input" type="date" name="appt_date" required />
+              </div>
+              <div class="field-group">
+                <label>Appointment Time</label>
+                <input class="input" type="time" name="appt_time" required />
+              </div>
+              <div class="field-group">
+                <label>Parlour</label>
+                <select class="select" id="appointmentParlour" name="parlour" required></select>
+              </div>
+              <div class="field-group">
+                <label>Booked By User</label>
+                <select class="select" id="appointmentCreatedBy" name="created_by"></select>
+              </div>
+              <div class="field-group">
+                <label>Status</label>
+                <select class="select" name="status" required>
+                  <option value="booked">Booked</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div class="field-group full-width">
+                <label>Selected Services</label>
+                <select class="select multi-select" id="appointmentServices" name="serviceIds" multiple required></select>
+              </div>
+              <div class="field-group full-width">
+                <label>Details</label>
+                <textarea class="textarea" name="detail"></textarea>
+              </div>
+              <div class="button-row full-width">
+                <button type="submit" class="button">Save Appointment</button>
+                <button type="button" class="button secondary" id="appointmentResetButton">Reset</button>
+                <button type="button" class="button danger" id="appointmentDeleteButton">Delete Current</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3>Invoice Preview</h3>
+                <p class="helper-text">Bill formula: Total Bill = Sum of selected service prices.</p>
+              </div>
+            </div>
+            <div id="invoicePreview"></div>
+          </article>
+        </section>
+
+        <section class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <div>
+              <h3>Appointment Records</h3>
+              <p class="helper-text">Search by date such as `2026-03-30` to demonstrate the required filter.</p>
+            </div>
+          </div>
+          <div class="toolbar">
+            <input class="input" id="appointmentSearchInput" placeholder="Search appointments by date" />
+            <button class="button secondary" id="appointmentSearchButton">Search</button>
+          </div>
+          <div class="table-wrap" style="margin-top: 14px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Customer</th>
+                  <th>Service</th>
+                  <th>Date</th>
+                  <th>Parlour</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="appointmentTableBody"></tbody>
+            </table>
+          </div>
+          <div class="navigator" style="margin-top: 14px;">
+            <button class="mini-button" data-direction="first">First</button>
+            <button class="mini-button" data-direction="previous">Previous</button>
+            <button class="mini-button" data-direction="next">Next</button>
+            <button class="mini-button" data-direction="last">Last</button>
+            <span id="appointmentNavigatorLabel">Current Record: none selected</span>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/layout.js"></script>
+    <script src="/js/appointments.js"></script>
+  </body>
+</html>
